@@ -1,9 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(SPM)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Add AVX2 flag
+# Find Python
+find_package(Python3 REQUIRED)
+
+# Use the specified Python executable
+if(Python3_EXECUTABLE)
+    set(Python3_EXECUTABLE ${Python3_EXECUTABLE})
+endif()
+
+# Add AVX2
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-mavx2 -mfma)
 endif()
