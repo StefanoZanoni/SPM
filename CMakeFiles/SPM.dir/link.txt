@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -O3 CMakeFiles/SPM.dir/main.cpp.o CMakeFiles/SPM.dir/src/sequential/sequential.cpp.o -o build/SPM 

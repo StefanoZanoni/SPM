@@ -1,0 +1,3 @@
+/home/stefano/programming/CLionProjects/SPM/CMakeFiles/SPM.dir
+/home/stefano/programming/CLionProjects/SPM/CMakeFiles/edit_cache.dir
+/home/stefano/programming/CLionProjects/SPM/CMakeFiles/rebuild_cache.dir
