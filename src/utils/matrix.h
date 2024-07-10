@@ -5,6 +5,8 @@
 #include <cmath>
 #include <iomanip>
 #include <immintrin.h>
+#include <xmmintrin.h>
+#include <cstdlib>
 
 class UTMatrix {
 
@@ -22,7 +24,7 @@ public:
     void setUpperDiagonals() {
         for (unsigned int k = 1; k < size; ++k) {
             for (unsigned int i = 0; i < size - k; ++i) {
-                double dot_product = 0.0;
+                double dot_product;
 
                 // precompute indices
                 unsigned int base_index = index(i, i);
@@ -39,8 +41,8 @@ public:
                 }
 
                 // Sum the elements of vec_dot_product
-                double temp[4];
-                _mm256_storeu_pd(temp, vec_dot_product);
+                alignas(32) double temp[4];
+                _mm256_store_pd(temp, vec_dot_product);
                 dot_product = temp[0] + temp[1] + temp[2] + temp[3];
 
                 // Handle the remaining elements
