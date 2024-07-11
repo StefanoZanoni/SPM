@@ -6,19 +6,24 @@
 #include <iomanip>
 #include <immintrin.h>
 #include <cstdlib>
+#include <mm_malloc.h>
 #include <ff/parallel_for.hpp>
 
 class FFMatrix {
 
 public:
-    explicit FFMatrix(unsigned int size) : size(size), data(new double[size * (size + 1) / 2]()) {
+    explicit FFMatrix(unsigned int size) : size(size),
+    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))) {
+        if (!data) {
+            throw std::runtime_error("Memory allocation failed");
+        }
         for (unsigned int i = 0; i < size; ++i) {
             data[index(i, i)] = double (i + 1) / size;
         }
     }
 
     ~FFMatrix() {
-        delete[] data;
+        _mm_free(data);
     }
 
     void setUpperDiagonals() {
@@ -73,7 +78,7 @@ public:
 private:
 
     unsigned int size;
-    double* data;
+    alignas(32) double* data;
 
     [[nodiscard]] inline unsigned int index(unsigned int row, unsigned int column) const {
         return (row * (2 * size - row - 1)) / 2 + column;
