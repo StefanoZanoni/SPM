@@ -4,6 +4,6 @@
 #include "src/fastflow/parallel.h"
 
 int main() {
-    // testSequential();
+    testSequential();
     testParallel();
 }
