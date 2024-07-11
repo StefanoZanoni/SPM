@@ -7,18 +7,23 @@
 #include <immintrin.h>
 #include <xmmintrin.h>
 #include <cstdlib>
+#include <mm_malloc.h>
 
 class UTMatrix {
 
 public:
-    explicit UTMatrix(unsigned int size) : size(size), data(new double[size * (size + 1) / 2]()) {
+    explicit UTMatrix(unsigned int size) : size(size),
+    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), alignof(data)))) {
+        if (!data) {
+            throw std::runtime_error("Memory allocation failed");
+        }
         for (unsigned int i = 0; i < size; ++i) {
             data[index(i, i)] = double (i + 1) / size;
         }
     }
 
     ~UTMatrix() {
-        delete[] data;
+        _mm_free(data);
     }
 
     void setUpperDiagonals() {
@@ -29,6 +34,10 @@ public:
                 // precompute indices
                 unsigned int base_index = index(i, i);
                 unsigned int offset_index = index(i + 1, i + k);
+
+                // Ensure the indices are aligned to 32 bytes
+                base_index = base_index & ~3;
+                offset_index = offset_index & ~3;
 
                 // Use AVX2 for SIMD operations
                 __m256d vec_dot_product = _mm256_setzero_pd();
@@ -71,7 +80,7 @@ public:
 
 private:
     unsigned int size;
-    double* data;
+    alignas(32) double* data;
 
     [[nodiscard]] inline unsigned int index(unsigned int row, unsigned int column) const {
         return (row * (2 * size - row - 1)) / 2 + column;
