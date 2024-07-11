@@ -13,7 +13,7 @@ class UTMatrix {
 
 public:
     explicit UTMatrix(unsigned int size) : size(size),
-    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), alignof(data)))) {
+    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))) {
         if (!data) {
             throw std::runtime_error("Memory allocation failed");
         }
@@ -34,10 +34,6 @@ public:
                 // precompute indices
                 unsigned int base_index = index(i, i);
                 unsigned int offset_index = index(i + 1, i + k);
-
-                // Ensure the indices are aligned to 32 bytes
-                base_index = base_index & ~3;
-                offset_index = offset_index & ~3;
 
                 // Use AVX2 for SIMD operations
                 __m256d vec_dot_product = _mm256_setzero_pd();
