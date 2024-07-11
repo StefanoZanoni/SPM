@@ -37,9 +37,18 @@ file(MAKE_DIRECTORY ${RESULTS_DIR})
 # Set the output directory for the executable
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
+set(FASTFLOW_DIR ${PROJECT_DIR}/fastflow-master)
+include_directories(${FASTFLOW_DIR})
+
+# Link the FastFlow library
+link_directories(${FASTFLOW_DIR})
+
 add_executable(SPM main.cpp
         src/utils/matrix.h
         src/sequential/sequential.cpp
         src/utils/timer.h
         src/sequential/sequential.h
-        src/utils/csv.h)
+        src/utils/csv.h
+        src/fastflow/ffmatrix.h
+        src/fastflow/parallel.cpp
+        src/fastflow/parallel.h)
