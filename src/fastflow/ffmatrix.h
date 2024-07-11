@@ -8,12 +8,14 @@
 #include <cstdlib>
 #include <mm_malloc.h>
 #include <ff/parallel_for.hpp>
+#include <thread>
 
 class FFMatrix {
 
 public:
-    explicit FFMatrix(unsigned int size) : size(size),
-    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))) {
+    explicit FFMatrix(const unsigned int size, const unsigned int maxnw = std::thread::hardware_concurrency()) :
+    size{size}, maxnw{maxnw},
+    data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))} {
         if (!data) {
             throw std::runtime_error("Memory allocation failed");
         }
@@ -27,9 +29,10 @@ public:
     }
 
     void setUpperDiagonals() {
-        ff::ParallelFor pf;
+        ff::ParallelFor pf{maxnw};
+
         for (unsigned int k = 1; k < size; ++k) {
-            pf.parallel_for(0, size - k, 1, 0, [&](const long i) {
+            pf.parallel_for(0, size - k, 1, [&](const long i) {
                 double dot_product;
 
                 // precompute indices
@@ -41,6 +44,11 @@ public:
                 // Compute dot product
                 unsigned int j = 0;
                 for (; j + 3 < k; j += 4) {
+                    if (j + 4 < k) {
+                        _mm_prefetch(reinterpret_cast<const char *>(&data[base_index + j + 4]), _MM_HINT_T0);
+                        _mm_prefetch(reinterpret_cast<const char *>(&data[offset_index + j + 4]), _MM_HINT_T0);
+                    }
+
                     __m256d vec1 = _mm256_loadu_pd(&data[base_index + j]);
                     __m256d vec2 = _mm256_loadu_pd(&data[offset_index + j]);
                     vec_dot_product = _mm256_fmadd_pd(vec1, vec2, vec_dot_product);
@@ -77,7 +85,8 @@ public:
 
 private:
 
-    unsigned int size;
+    const unsigned int size;
+    const unsigned int maxnw;
     alignas(32) double* data;
 
     [[nodiscard]] inline unsigned int index(unsigned int row, unsigned int column) const {
