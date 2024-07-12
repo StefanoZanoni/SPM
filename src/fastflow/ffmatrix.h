@@ -78,11 +78,6 @@ public:
 
                 size_t j = 0;
                 for (; j + 3 < k; j += 4) {
-                    if (j + 4 < k) {
-                        _mm_prefetch(reinterpret_cast<const char *>(&data[base_index + j + 4]), _MM_HINT_T0);
-                        _mm_prefetch(reinterpret_cast<const char *>(&data[offset_index + j + 4]), _MM_HINT_T0);
-                    }
-
                     vec1 = _mm256_loadu_pd(&data[base_index + j]);
                     vec2 = _mm256_loadu_pd(&data[offset_index + j]);
                     vec_dot_product = _mm256_fmadd_pd(vec1, vec2, vec_dot_product);
