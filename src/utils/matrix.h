@@ -28,7 +28,7 @@ public:
         _mm_free(data);
     }
 
-    void setUpperDiagonals() {
+    void set_upper_diagonals() {
         size_t base_index;
         size_t offset_index;
         __m256d vec_dot_product;
