@@ -17,13 +17,14 @@ inline void bind_thread_to_cpu(const size_t cpu_id) {
 }
 
 class FFMatrix {
-
 public:
     explicit FFMatrix(const long size, const long maxnw = std::thread::hardware_concurrency()) : size{size}, maxnw{maxnw} {
 
         const size_t num_numa_nodes = numa_num_configured_nodes();
+
         data_parts.resize(num_numa_nodes);
-        const size_t part_size = (size * (size + 1) / 2) / num_numa_nodes;
+        const size_t part_size = std::max(static_cast<size_t>(std::round((size * (size + 1) / 2) / num_numa_nodes)),
+                                          size_t(1));
         const size_t alignment = 32;
         size_t space = part_size * sizeof(double) + alignment - 1;
 
@@ -42,7 +43,8 @@ public:
 
         for (size_t node = 0; node < num_numa_nodes; ++node) {
             for (size_t i = 0; i < size; ++i) {
-                data_parts[node][local_index(i, i)] = double(i + 1) / (double) size;
+                size_t index = local_index(i, i);
+                data_parts[node][index] = double (i + 1) / (double) size;
             }
         }
     }
@@ -122,7 +124,8 @@ private:
 
     [[nodiscard]] inline size_t local_index(const size_t row, const size_t column) const {
         const size_t global_index = (row * (2 * size - row - 1)) / 2 + column;
-        const size_t part_size = (size * (size + 1) / 2) / data_parts.size();
+        const size_t part_size = std::max(static_cast<size_t>(std::round((size * (size + 1) / 2) / data_parts.size())),
+                                          size_t(1));
         return global_index % part_size;
     }
 
