@@ -20,7 +20,7 @@ public:
             throw std::runtime_error("Memory allocation failed");
         }
         for (size_t i = 0; i < size; ++i) {
-            data[index(i, i)] = double (i + 1) / size;
+            data[index(i, i)] = double (i + 1) / (double) size;
         }
     }
 
@@ -83,7 +83,7 @@ public:
 
 private:
     const size_t size;
-    alignas(32) double* const data;
+    double* const data;
 
     [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
         return (row * (2 * size - row - 1)) / 2 + column;
