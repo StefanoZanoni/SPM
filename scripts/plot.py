@@ -34,7 +34,7 @@ plt.savefig('./plots/sequential.png')
 plt.close()
 
 # Plot the data
-plt.figure(figsize=(8, 8))
+plt.figure(figsize=(10, 6))
 plt.plot(x_data_parallel, y_data_parallel)
 plt.xlabel(headers[0])
 plt.ylabel(headers[1] + ' (ms)')
