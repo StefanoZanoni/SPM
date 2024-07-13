@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "../utils/matrix.h"
+#include "matrix.h"
 #include "../utils/timer.h"
 #include "../utils/csv.h"
 
