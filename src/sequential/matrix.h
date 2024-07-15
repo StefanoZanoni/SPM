@@ -29,39 +29,38 @@ public:
     }
 
     void set_upper_diagonals() {
-        size_t base_index;
-        size_t offset_index;
+        size_t row_index;
+        size_t column_index;
         __m256d vec_dot_product;
-        __m256d vec1;
-        __m256d vec2;
-        alignas(32) double temp[4];
-        double dot_product;
+        __m256d row;
+        __m256d column;
+        alignas(32) double dot_product[4];
 
         for (size_t k = 1; k < size; ++k) {
             for (size_t i = 0; i < size - k; ++i) {
 
                 // precompute indices
-                base_index = index(i, i);
-                offset_index = index(i + 1, i + k);
+                row_index = index(i, i);
+                column_index = index(i + 1, i + k);
 
                 // Use AVX2 for SIMD operations
                 vec_dot_product = _mm256_setzero_pd();
                 size_t j = 0;
                 for (; j + 3 < k; j += 4) {
-                    vec1 = _mm256_loadu_pd(&data[base_index + j]);
-                    vec2 = _mm256_loadu_pd(&data[offset_index + j]);
-                    vec_dot_product = _mm256_fmadd_pd(vec1, vec2, vec_dot_product);
+                    row = _mm256_loadu_pd(&data[row_index + j]);
+                    column = _mm256_loadu_pd(&data[column_index + j]);
+                    vec_dot_product = _mm256_fmadd_pd(row, column, vec_dot_product);
                 }
 
-                _mm256_store_pd(temp, vec_dot_product);
-                dot_product = temp[0] + temp[1] + temp[2] + temp[3];
+                _mm256_store_pd(dot_product, vec_dot_product);
+                dot_product[0] += dot_product[1] + dot_product[2] + dot_product[3];
 
                 // Handle the remaining elements
                 for (; j < k; ++j) {
-                    dot_product += data[base_index + j] * data[offset_index + j];
+                    dot_product[0] += data[row_index + j] * data[column_index + j];
                 }
 
-                data[base_index + k] = std::cbrt(dot_product);
+                data[row_index + k] = std::cbrt(dot_product[0]);
             }
         }
 
