@@ -13,12 +13,9 @@ class UTMatrix {
 
 public:
     explicit UTMatrix(const size_t size) :
-    size(size),
-    data(static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32)))
+    size{size},
+    data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))}
     {
-        if (!data) {
-            throw std::runtime_error("Memory allocation failed");
-        }
         for (size_t i = 0; i < size; ++i) {
             data[index(i, i)] = double (i + 1) / (double) size;
         }
@@ -82,7 +79,7 @@ public:
 
 private:
     const size_t size;
-    double* const data;
+    double* __restrict__ const data;
 
     [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
         return (row * (2 * size - row - 1)) / 2 + column;
