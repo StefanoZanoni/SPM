@@ -30,7 +30,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-mavx2 -mfma)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=native")
 
 # Get the absolute path of the project directory
 set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
@@ -44,8 +44,8 @@ set(RESULTS_DIR ${PROJECT_DIR}/results)
 file(MAKE_DIRECTORY ${RESULTS_DIR})
 
 # Create the plots directory if it doesn't exist
-set(RESULTS_DIR ${PROJECT_DIR}/plots)
-file(MAKE_DIRECTORY ${RESULTS_DIR})
+set(PLOTS_DIR ${PROJECT_DIR}/plots)
+file(MAKE_DIRECTORY ${PLOTS_DIR})
 
 # Set the output directory for the executable
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
@@ -57,7 +57,7 @@ include_directories(${FASTFLOW_DIR})
 link_directories(${FASTFLOW_DIR})
 
 add_executable(SPM main.cpp
-        src/utils/matrix.h
+        src/sequential/matrix.h
         src/sequential/sequential.cpp
         src/utils/timer.h
         src/sequential/sequential.h
