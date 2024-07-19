@@ -24,11 +24,11 @@ public:
         _mm_free(data);
     }
 
-    void set_upper_diagonals() {
-        ff::ParallelFor pf{true, true};
+    void set_upper_diagonals(const long maxnw = 0) {
+        ff::ParallelFor pf = (maxnw <= 0) ? ff::ParallelFor{true, true} : ff::ParallelFor{maxnw, true, true};
 
         for (long k = 1; k < size; ++k) {
-            pf.parallel_for(0, size - k, 1, [&](const long i) {
+            pf.parallel_for_static(0, size - k, 1, 0, [&](const long i) {
                 // precompute indices
                 const size_t base_index = index(i, i);
                 const size_t offset_index = index(i + 1, i + k);
