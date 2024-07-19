@@ -9,7 +9,7 @@
 
 void test_sequential() {
     std::vector<std::vector<double>> results;
-    for (unsigned int dimension = 1; dimension <= 1000; ++dimension) {
+    for (unsigned int dimension = 1000; dimension <= 2000; ++dimension) {
         UTMatrix matrix{dimension};
         double executionTime = measureExecutionTime([&matrix]() {
             matrix.set_upper_diagonals();
