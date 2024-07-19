@@ -26,13 +26,6 @@ public:
     }
 
     void set_upper_diagonals() {
-        // Pin the current thread to the core 0 to improve cache performance
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        CPU_SET(0, &cpuset);
-        pthread_t current_thread = pthread_self();
-        pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-
         size_t row_index;
         size_t column_index;
         __m256d vec_dot_product;
