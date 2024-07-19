@@ -8,3 +8,4 @@ make
 
 ./build/SPM 8
 python3 ./scripts/plot.py --workers 8
+python3 ./scripts/statistics.py --workers 8
