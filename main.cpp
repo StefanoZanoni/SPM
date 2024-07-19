@@ -21,5 +21,5 @@ int main(int argc, char *argv[]) {
     }
 
     test_sequential();
-    //test_parallel(maxnw);
+    test_parallel(maxnw);
 }
