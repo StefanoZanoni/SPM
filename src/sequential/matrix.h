@@ -64,17 +64,19 @@ public:
     }
 
     void print() const {
+        std::ostringstream oss;
         for (size_t i = 0; i < size; ++i) {
             for (size_t j = 0; j < size; ++j) {
                 if (j >= i) {
-                    std::cout << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
+                    oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
                 } else {
-                    std::cout << std::setw(10) << "0 ";
+                    oss << std::setw(10) << "0 ";
                 }
             }
-            std::cout << std::endl;
+            oss << '\n';
         }
-        std::cout << "\n" << std::endl;
+        oss << "\n";
+        std::cout << oss.str();
     }
 
 private:

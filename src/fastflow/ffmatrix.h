@@ -62,17 +62,19 @@ public:
     }
 
     void print() const {
-        for (unsigned int i = 0; i < size; ++i) {
-            for (unsigned int j = 0; j < size; ++j) {
+        std::ostringstream oss;
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
                 if (j >= i) {
-                    std::cout << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)]<< " ";
+                    oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
                 } else {
-                    std::cout << std::setw(10) << "0 ";
+                    oss << std::setw(10) << "0 ";
                 }
             }
-            std::cout << std::endl;
+            oss << '\n';
         }
-        std::cout << "\n" << std::endl;
+        oss << "\n";
+        std::cout << oss.str();
     }
 
 private:
@@ -80,7 +82,7 @@ private:
     const long size;
     double* __restrict__ const data;
 
-    [[nodiscard]] inline size_t index(unsigned int row, unsigned int column) const {
+    [[nodiscard]] inline size_t index(size_t row, size_t column) const {
         return (row * (2 * size - row - 1)) / 2 + column;
     }
 
