@@ -47,6 +47,10 @@ file(MAKE_DIRECTORY ${RESULTS_DIR})
 set(PLOTS_DIR ${PROJECT_DIR}/plots)
 file(MAKE_DIRECTORY ${PLOTS_DIR})
 
+# Create the statistics directory if it doesn't exist
+set(STATISTICS_DIR ${PROJECT_DIR}/statistics)
+file(MAKE_DIRECTORY ${STATISTICS_DIR})
+
 # Set the output directory for the executable
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
