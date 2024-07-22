@@ -15,7 +15,7 @@ class FFMatrix {
 public:
     explicit FFMatrix(const long size) : size{size},
             data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))} {
-        for (size_t i = 0; i < size; ++i) {
+        for (long i = 0; i < size; ++i) {
             data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
     }
@@ -63,8 +63,8 @@ public:
 
     void print() const {
         std::ostringstream oss;
-        for (size_t i = 0; i < size; ++i) {
-            for (size_t j = 0; j < size; ++j) {
+        for (long i = 0; i < size; ++i) {
+            for (long j = 0; j < size; ++j) {
                 if (j >= i) {
                     oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
                 } else {

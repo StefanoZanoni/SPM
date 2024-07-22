@@ -7,25 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Find Python
 find_package(Python3 REQUIRED)
 
-find_path(NUMA_INCLUDE_DIR numa.h PATHS $ENV{HOME}/numa/include)
-find_library(NUMA_LIBRARY NAMES numa PATHS $ENV{HOME}/numa/lib)
-
-if(NUMA_INCLUDE_DIR AND NUMA_LIBRARY)
-    set(NUMA_FOUND TRUE)
-    set(NUMA_LIBRARIES ${NUMA_LIBRARY})
-    set(NUMA_INCLUDE_DIRS ${NUMA_INCLUDE_DIR})
-else()
-    set(NUMA_FOUND FALSE)
-endif()
-
-mark_as_advanced(NUMA_INCLUDE_DIR NUMA_LIBRARY)
-
 # Use the specified Python executable
 if(Python3_EXECUTABLE)
     set(Python3_EXECUTABLE ${Python3_EXECUTABLE})
 endif()
 
-# Add AVX2
+# Add AVX2 and FMA flags for GCC and Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-mavx2 -mfma)
 endif()
@@ -57,11 +44,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(FASTFLOW_DIR ${PROJECT_DIR}/fastflow-master)
 include_directories(${FASTFLOW_DIR})
 
-# Link the FastFlow library
-link_directories(${FASTFLOW_DIR})
-
 add_executable(SPM main.cpp
         src/sequential/sequential.cpp
         src/fastflow/parallel.cpp)
-
-target_link_libraries(SPM ${NUMA_LIBRARIES})
