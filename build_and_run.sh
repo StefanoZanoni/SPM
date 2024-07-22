@@ -6,6 +6,13 @@ cd "$(dirname "$0")" || exit
 cmake .
 make
 
-./build/SPM 8
-python3 ./scripts/plot.py --workers 8
-python3 ./scripts/statistics.py --workers 8
+# Determine the number of workers
+if [ -z "$1" ]; then
+  num_workers=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
+else
+  num_workers=$1
+fi
+
+./build/SPM "$num_workers"
+python3 ./scripts/plot.py --workers "$num_workers"
+python3 ./scripts/statistics.py --workers "$num_workers"
