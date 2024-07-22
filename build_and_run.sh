@@ -8,7 +8,12 @@ make
 
 # Determine the number of workers
 if [ -z "$1" ]; then
-  num_workers=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
+    # Get the number of cores per socket
+    cores_per_socket=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
+    # Get the number of sockets
+    sockets=$(lscpu | grep "^Socket(s):" | awk '{print $2}')
+    # Calculate the total number of physical cores
+    num_workers=$((cores_per_socket * sockets))
 else
   num_workers=$1
 fi
