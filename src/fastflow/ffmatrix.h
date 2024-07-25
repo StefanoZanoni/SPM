@@ -14,7 +14,7 @@ class FFMatrix {
 
 public:
     explicit FFMatrix(const long size) : size{size},
-            data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))} {
+            data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))} {
         for (long i = 0; i < size; ++i) {
             data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
