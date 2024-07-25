@@ -47,3 +47,15 @@ include_directories(${FASTFLOW_DIR})
 add_executable(SPM main.cpp
         src/sequential/sequential.cpp
         src/fastflow/parallel.cpp)
+
+# Add the indicators library
+include(FetchContent)
+FetchContent_Declare(
+        indicators
+        GIT_REPOSITORY https://github.com/p-ranav/indicators.git
+        GIT_TAG        v2.3
+)
+FetchContent_MakeAvailable(indicators)
+
+# Link the indicators library
+target_link_libraries(SPM PRIVATE indicators)
