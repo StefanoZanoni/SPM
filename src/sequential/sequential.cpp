@@ -16,6 +16,8 @@ void test_sequential() {
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
 
+    std::cout << "Processing sequential..." << std::endl;
+
     indicators::ProgressBar bar{
             indicators::option::BarWidth{50},
             indicators::option::Start{"["},
@@ -29,8 +31,6 @@ void test_sequential() {
             indicators::option::ShowRemainingTime{true},
             indicators::option::MaxProgress{end - start + 1 + 2}
     };
-
-    std::cout << "Processing sequential..." << std::endl;
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});

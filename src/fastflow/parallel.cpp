@@ -16,6 +16,8 @@ void test_parallel(const long maxnw) {
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
 
+    std::cout << "Processing with " << maxnw << " threads..." << std::endl;
+
     indicators::ProgressBar bar{
             indicators::option::BarWidth{50},
             indicators::option::Start{"["},
@@ -29,7 +31,6 @@ void test_parallel(const long maxnw) {
             indicators::option::ShowRemainingTime{true},
             indicators::option::MaxProgress{end - start + 1 + 2}
     };
-    std::cout << "Processing with " << maxnw << " threads..." << std::endl;
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
@@ -65,7 +66,6 @@ void test_parallel(const long maxnw) {
     results.clear();
 
     std::cout << "Processing with 1 thread..." << std::endl;
-    bar.set_option(indicators::option::MaxProgress{end - start + 1 + 2});
     bar.set_progress(0);
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
