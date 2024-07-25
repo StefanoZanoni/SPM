@@ -17,85 +17,63 @@ void test_parallel(const long maxnw) {
 
     std::cout << "Processing with " << maxnw << " threads..." << std::endl;
 
-    indicators::ProgressBar bar{
-            indicators::option::BarWidth{50},
-            indicators::option::Start{"["},
-            indicators::option::Fill{"="},
-            indicators::option::Lead{">"},
-            indicators::option::Remainder{" "},
-            indicators::option::End{"]"},
-            indicators::option::PostfixText{"Initializing..."},
-            indicators::option::ForegroundColor{indicators::Color::yellow},
-            indicators::option::ShowElapsedTime{true},
-            indicators::option::ShowRemainingTime{true},
-            indicators::option::MaxProgress{end - start + 1 + 2}
-    };
+    {
+        indicators::ProgressBar bar{
+                indicators::option::BarWidth{50},
+                indicators::option::Start{"["},
+                indicators::option::Fill{"="},
+                indicators::option::Lead{">"},
+                indicators::option::Remainder{" "},
+                indicators::option::End{"]"},
+                indicators::option::PostfixText{"Initializing..."},
+                indicators::option::ForegroundColor{indicators::Color::yellow},
+                indicators::option::ShowElapsedTime{true},
+                indicators::option::ShowRemainingTime{true},
+                indicators::option::MaxProgress{end - start + 1}
+        };
 
-    for (unsigned int dimension = start; dimension <= end; ++dimension) {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
-        FFMatrix matrix{dimension};
-        executionTime = measureExecutionTime([&matrix, maxnw]() {
-            matrix.set_upper_diagonals(maxnw);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
-        bar.tick();
+        for (unsigned int dimension = start; dimension <= end; ++dimension) {
+            bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+            FFMatrix matrix{dimension};
+            executionTime = measureExecutionTime([&matrix, maxnw]() {
+                matrix.set_upper_diagonals(maxnw);
+            });
+            results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+            bar.tick();
+        }
+
+        writeCSV<double>("parallel_p.csv", headers, results);
+        results.clear();
     }
 
     {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 4096"});
-        FFMatrix matrix{4096};
-        executionTime = measureExecutionTime([&matrix, maxnw]() {
-            matrix.set_upper_diagonals(maxnw);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(4096), executionTime});
-        bar.tick();
+        indicators::ProgressBar bar{
+                indicators::option::BarWidth{50},
+                indicators::option::Start{"["},
+                indicators::option::Fill{"="},
+                indicators::option::Lead{">"},
+                indicators::option::Remainder{" "},
+                indicators::option::End{"]"},
+                indicators::option::PostfixText{"Initializing..."},
+                indicators::option::ForegroundColor{indicators::Color::yellow},
+                indicators::option::ShowElapsedTime{true},
+                indicators::option::ShowRemainingTime{true},
+                indicators::option::MaxProgress{end - start + 1}
+        };
+
+        std::cout << "Processing with 1 thread..." << std::endl;
+        bar.set_progress(0);
+
+        for (unsigned int dimension = start; dimension <= end; ++dimension) {
+            bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+            FFMatrix matrix{dimension};
+            executionTime = measureExecutionTime([&matrix]() {
+                matrix.set_upper_diagonals(1);
+            });
+            results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+            bar.tick();
+        }
+
+        writeCSV<double>("parallel_1.csv", headers, results);
     }
-
-    {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 8192"});
-        FFMatrix matrix{8192};
-        executionTime = measureExecutionTime([&matrix, maxnw]() {
-            matrix.set_upper_diagonals(maxnw);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(8192), executionTime});
-        bar.tick();
-    }
-
-    writeCSV<double>("parallel_p.csv", headers, results);
-    results.clear();
-
-    std::cout << "Processing with 1 thread..." << std::endl;
-    bar.set_progress(0);
-
-    for (unsigned int dimension = start; dimension <= end; ++dimension) {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
-        FFMatrix matrix{dimension};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals(1);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
-        bar.tick();
-    }
-
-    {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 4096"});
-        FFMatrix matrix{4096};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals(1);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(4096), executionTime});
-        bar.tick();
-    }
-
-    {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 8192"});
-        FFMatrix matrix{8192};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals(1);
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(8192), executionTime});
-        bar.tick();
-    }
-
-    writeCSV<double>("parallel_1.csv", headers, results);
 }

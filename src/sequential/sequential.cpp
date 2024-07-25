@@ -28,7 +28,7 @@ void test_sequential() {
             indicators::option::ForegroundColor{indicators::Color::yellow},
             indicators::option::ShowElapsedTime{true},
             indicators::option::ShowRemainingTime{true},
-            indicators::option::MaxProgress{end - start + 1 + 2}
+            indicators::option::MaxProgress{end - start + 1}
     };
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
@@ -38,26 +38,6 @@ void test_sequential() {
             matrix.set_upper_diagonals();
         });
         results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
-        bar.tick();
-    }
-
-    {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 4096"});
-        UTMatrix matrix{4096};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals();
-        });
-        results.emplace_back(std::vector<double>{static_cast<double>(4096), executionTime});
-        bar.tick();
-    }
-
-    {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension 8192"});
-        UTMatrix matrix{8192};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals();
-        });
-        results.emplace_back(std::vector<double> {static_cast<double>(8192), executionTime});
         bar.tick();
     }
 
