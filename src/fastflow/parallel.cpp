@@ -29,7 +29,7 @@ void test_parallel(const long maxnw) {
             indicators::option::ShowRemainingTime{true},
             indicators::option::MaxProgress{end - start + 1 + 2}
     };
-    std::cout << "\nProcessing with " << maxnw << " threads...\n" << std::endl;
+    std::cout << "Processing with " << maxnw << " threads..." << std::endl;
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
@@ -62,10 +62,9 @@ void test_parallel(const long maxnw) {
     }
 
     writeCSV<double>("parallel_p.csv", headers, results);
-
     results.clear();
 
-    std::cout << "\nProcessing with 1 thread...\n" << std::endl;
+    std::cout << "Processing with 1 thread..." << std::endl;
     bar.set_option(indicators::option::MaxProgress{end - start + 1 + 2});
     bar.set_progress(0);
 

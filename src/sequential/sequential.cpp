@@ -30,7 +30,7 @@ void test_sequential() {
             indicators::option::MaxProgress{end - start + 1 + 2}
     };
 
-    std::cout << "\nProcessing sequential...\n" << std::endl;
+    std::cout << "Processing sequential..." << std::endl;
 
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
