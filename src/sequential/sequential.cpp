@@ -1,6 +1,5 @@
 #include <vector>
 #include <indicators/progress_bar.hpp>
-#include <indicators/cursor_control.hpp>
 
 #include "matrix.h"
 #include "../utils/timer.h"
