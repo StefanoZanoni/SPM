@@ -29,34 +29,36 @@ public:
 
         for (long k = 1; k < size; ++k) {
             pf.parallel_for_static(0, size - k, 1, 0, [&](const long i) {
-                // precompute indices
-                const size_t base_index = index(i, i);
-                const size_t offset_index = index(i + 1, i + k);
 
-                // Use AVX2 for SIMD operations
                 __m256d vec_dot_product = _mm256_setzero_pd();
-                __m256d vec1;
-                __m256d vec2;
+                __m256d row;
+                __m256d column;
 
-                // Compute dot product
                 unsigned int j = 0;
                 for (; j + 3 < k; j += 4) {
-                    vec1 = _mm256_loadu_pd(&data[base_index + j]);
-                    vec2 = _mm256_loadu_pd(&data[offset_index + j]);
-                    vec_dot_product = _mm256_fmadd_pd(vec1, vec2, vec_dot_product);
+                    row = _mm256_loadu_pd(&data[index(i, i + j)]);
+
+                    // The matrix is stored in row major order therefore the elements for the column are not contiguous
+                    int indices[4] = {
+                            static_cast<int>(index(i + j + 1, i + k)),
+                            static_cast<int>(index(i + j + 2, i + k)),
+                            static_cast<int>(index(i + j + 3, i + k)),
+                            static_cast<int>(index(i + j + 4, i + k))
+                    };
+                    column = _mm256_i32gather_pd(&data[0], _mm_loadu_si128(reinterpret_cast<const __m128i*>(indices)), 8);
+
+                    vec_dot_product = _mm256_fmadd_pd(row, column, vec_dot_product);
                 }
 
-                // Sum the elements of vec_dot_product
                 alignas(32) double dot_product[4];
                 _mm256_store_pd(dot_product, vec_dot_product);
                 dot_product[0] += dot_product[1] + dot_product[2] + dot_product[3];
 
-                // Handle the remaining elements
                 for (; j < k; ++j) {
-                    dot_product[0] += data[base_index + j] * data[offset_index + j];
+                    dot_product[0] += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
 
-                data[base_index + k] = std::cbrt(dot_product[0]);
+                data[index(i, i + k)] = std::cbrt(dot_product[0]);
             });
         }
     }
@@ -82,8 +84,8 @@ private:
     const long size;
     double* __restrict__ const data;
 
-    [[nodiscard]] inline size_t index(size_t row, size_t column) const {
-        return (row * (2 * size - row - 1)) / 2 + column;
+    [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
+        return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 
 };
