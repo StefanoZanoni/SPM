@@ -26,8 +26,6 @@ public:
     }
 
     void set_upper_diagonals() {
-        size_t row_index;
-        size_t column_index;
         __m256d vec_dot_product;
         __m256d row;
         __m256d column;
@@ -36,31 +34,37 @@ public:
         for (size_t k = 1; k < size; ++k) {
             for (size_t i = 0; i < size - k; ++i) {
 
-                // precompute indices
-                row_index = index(i, i);
-                column_index = index(i + 1, i + k);
-
                 // Use AVX2 for SIMD operations
                 vec_dot_product = _mm256_setzero_pd();
                 size_t j = 0;
                 for (; j + 3 < k; j += 4) {
-                    row = _mm256_loadu_pd(&data[row_index + j]);
-                    column = _mm256_loadu_pd(&data[column_index + j]);
+                    row = _mm256_loadu_pd(&data[index(i, i + j)]);
+
+                    // The matrix is stored in row major order therefore the elements for the column are not contiguous
+                    int indices[4] = {
+                            static_cast<int>(index(i + j + 1, i + k)),
+                            static_cast<int>(index(i + j + 2, i + k)),
+                            static_cast<int>(index(i + j + 3, i + k)),
+                            static_cast<int>(index(i + j + 4, i + k))
+                    };
+                    column = _mm256_i32gather_pd(&data[0], _mm_loadu_si128(reinterpret_cast<const __m128i*>(indices)), 8);
+
                     vec_dot_product = _mm256_fmadd_pd(row, column, vec_dot_product);
                 }
 
+                // Store the partial results from SIMD operations
                 _mm256_store_pd(dot_product, vec_dot_product);
                 dot_product[0] += dot_product[1] + dot_product[2] + dot_product[3];
 
                 // Handle the remaining elements
                 for (; j < k; ++j) {
-                    dot_product[0] += data[row_index + j] * data[column_index + j];
+                    dot_product[0] += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
 
-                data[row_index + k] = std::cbrt(dot_product[0]);
+                // Store the final dot product in the matrix
+                data[index(i, i + k)] = std::cbrt(dot_product[0]);
             }
         }
-
     }
 
     void print() const {
@@ -84,7 +88,7 @@ private:
     double* __restrict__ const data;
 
     [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
-        return (row * (2 * size - row - 1)) / 2 + column;
+        return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 
 };
