@@ -30,7 +30,11 @@ void writeCSV(const std::string& filename, const std::vector<std::string>& heade
     // Write data
     for (const auto& row : data) {
         for (size_t i = 0; i < row.size(); ++i) {
-            file << std::to_string(row[i]);
+            if constexpr (std::is_floating_point_v<T>) {
+                file << std::fixed << std::setprecision(8) << row[i];
+            } else {
+                file << row[i];
+            }
             if (i < row.size() - 1) {
                 file << ",";
             }
