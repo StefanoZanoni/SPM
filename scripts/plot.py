@@ -80,16 +80,16 @@ scalability_ma = moving_average(scalability, window_size)
 efficiency_ma = moving_average(efficiency, window_size)
 
 # Plot sequential
-plot_data_and_trend(x_data, y_data_sequential, y_data_sequential_ma, headers[0], headers[1] + ' (ms)',
+plot_data_and_trend(x_data, y_data_sequential, y_data_sequential_ma, headers[0], headers[1] + ' (s)',
                     'Plot of {} vs {}'.format(headers[1], headers[0]), './plots/sequential.png')
 
 # Plot parallel p workers
-plot_data_and_trend(x_data, y_data_parallel_p, y_data_parallel_p_ma, headers[0], headers[1] + ' (ms)',
+plot_data_and_trend(x_data, y_data_parallel_p, y_data_parallel_p_ma, headers[0], headers[1] + ' (s)',
                     'Plot of {} vs {} ({} workers)'.format(headers[1], headers[0], num_workers),
                     f'./plots/parallel_{num_workers}.png')
 
 # Plot parallel 1 worker
-plot_data_and_trend(x_data, y_data_parallel_1, y_data_parallel_1_ma, headers[0], headers[1] + ' (ms)',
+plot_data_and_trend(x_data, y_data_parallel_1, y_data_parallel_1_ma, headers[0], headers[1] + ' (s)',
                     'Plot of {} vs {} ({} workers)'.format(headers[1], headers[0], num_workers),
                     './plots/parallel_1.png')
 
