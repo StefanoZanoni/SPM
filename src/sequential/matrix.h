@@ -14,7 +14,7 @@ public:
     data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))}
     {
         for (size_t i = 0; i < size; ++i) {
-            data[index(i, i)] = double (i + 1) / (double) size;
+            data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
     }
 
@@ -24,13 +24,17 @@ public:
 
     void set_upper_diagonals() {
 
+        // Iterate over upper diagonals
         for (size_t k = 1; k < size; ++k) {
+            // Iterate over rows
             for (size_t i = 0; i < size - k; ++i) {
-                alignas(64) double dot_product = 0;
+
+                alignas(64) double dot_product{0};
                 for (size_t j = 0; j < k; ++j) {
                     dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
                 data[index(i, i + k)] = dot_product;
+
             }
         }
     }
