@@ -6,11 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Find Python
 find_package(Python3 REQUIRED)
-
 # Use the specified Python executable
 if(Python3_EXECUTABLE)
     set(Python3_EXECUTABLE ${Python3_EXECUTABLE})
 endif()
+
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 
 # Add AVX2 and FMA flags for GCC and Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -46,7 +48,8 @@ include_directories(${FASTFLOW_DIR})
 
 add_executable(SPM main.cpp
         src/sequential/sequential.cpp
-        src/fastflow/parallel.cpp)
+        src/fastflow/parallel.cpp
+        src/mpi/distributed.cpp)
 
 # Add the indicators library
 include(FetchContent)
@@ -57,5 +60,5 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(indicators)
 
-# Link the indicators library
 target_link_libraries(SPM PRIVATE indicators)
+target_link_libraries(SPM PRIVATE indicators ${MPI_LIBRARIES})
