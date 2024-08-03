@@ -10,70 +10,55 @@
 class MPIMatrix {
 
 public:
-    explicit MPIMatrix(const int rank, const int mpi_world_size, const int size) :
-            rank{rank},
+    explicit MPIMatrix(const int size, const int rank, const int mpi_world_size) :
             size{size},
             rows_per_proc{size / mpi_world_size},
             remainder{size % mpi_world_size},
-            recvcount{(rank < remainder) ? rows_per_proc + 1 : rows_per_proc},
-            data{nullptr},
-            recvbuf{nullptr},
-            rowcounts{new int[mpi_world_size]},
-            displs{new int[mpi_world_size]}
+            start_row{rank * rows_per_proc + std::min(rank, remainder)},
+            end_row{start_row + rows_per_proc + (rank < remainder ? 1 : 0)},
+            data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))},
+            diagonal_buffer{new double[end_row - start_row]},
+            combined_diagonal_buffer{new double[size]}
     {
-        if (rank == 0) {
-            data = static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64));
-            for (size_t i = 0; i < size; ++i) {
-                data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
-            }
-            for (int i = 0; i < mpi_world_size; ++i) {
-                rowcounts[i] = (i < remainder) ? (rows_per_proc + 1) * size : rows_per_proc * size;
-            }
-            displs[0] = 0;
-            for (int i = 1; i < mpi_world_size; ++i) {
-                displs[i] = displs[i - 1] + rowcounts[i - 1];
-            }
+        for (int i = 0; i < size; ++i) {
+            data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
     }
 
     ~MPIMatrix() {
-        if (rank == 0) {
-            _mm_free(data);
-            delete[] rowcounts;
-            delete[] displs;
-        }
-        _mm_free(recvbuf);
+        if (data) _mm_free(data);
+        delete[] diagonal_buffer;
+        delete[] combined_diagonal_buffer;
     }
 
     void set_upper_diagonals() {
-        // Scatter the data to all processes
-        scatter();
 
-        // Compute upper diagonals for the portion of data each process received
         for (int k = 1; k < size; ++k) {
-            for (int i = 0; i < recvcount - k; ++i) {
+
+            for (int i = start_row; i < end_row && i < size - k; ++i) {
                 alignas(64) double dot_product{0};
                 for (int j = 0; j < k; ++j) {
-                    dot_product += recvbuf[index(i, i + j)] * recvbuf[index(i + 1 + j, i + k)];
+                    dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
-                recvbuf[index(i, i + k)] = std::cbrt(dot_product);
+                data[index(i, i + k)] = std::cbrt(dot_product);
+                diagonal_buffer[i] = data[index(i, i + k)];
             }
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            MPI_Allgather(diagonal_buffer, end_row - start_row, MPI_DOUBLE,
+                          combined_diagonal_buffer, end_row - start_row, MPI_DOUBLE, MPI_COMM_WORLD);
+
+            for (int i = 0; i < size - k; ++i) {
+                data[index(i, i + k)] = combined_diagonal_buffer[i];
+            }
+
         }
-
-        // Synchronize all processes
-        MPI_Barrier(MPI_COMM_WORLD);
-
-        // Gather the computed data back to the root process
-        gather();
     }
 
     void print() const {
-        if (rank != 0)
-            return;
-
         std::ostringstream oss;
-        for (size_t i = 0; i < size; ++i) {
-            for (size_t j = 0; j < size; ++j) {
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
                 if (j >= i) {
                     oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
                 } else {
@@ -87,30 +72,19 @@ public:
     }
 
 private:
-    const int rank;
     const int size;
     const int rows_per_proc;
     const int remainder;
-    const int recvcount;
+    const int start_row;
+    const int end_row;
 
-    double* __restrict__ data;
-    double* __restrict__ recvbuf;
-    int* __restrict__ rowcounts;
-    int* __restrict__ displs;
+    double* __restrict__ const data;
+    double* __restrict__ const diagonal_buffer;
+    double* __restrict__ const combined_diagonal_buffer;
 
     [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
-
-    void scatter() {
-        recvbuf = static_cast<double*>(_mm_malloc(recvcount * size * sizeof(double), 64));
-        MPI_Scatterv(data, rowcounts, displs, MPI_DOUBLE, recvbuf, recvcount * size, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    }
-
-    void gather() {
-        MPI_Gatherv(recvbuf, recvcount * size, MPI_DOUBLE, data, rowcounts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    }
-
 };
 
 #endif //SPM_MPIMATRIX_H
