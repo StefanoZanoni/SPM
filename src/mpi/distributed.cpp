@@ -16,7 +16,7 @@ void test_distributed(int rank, int mpi_size) {
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
 
-    std::cout << "Processing distributed..." << std::endl;
+    //std::cout << "Processing distributed..." << std::endl;
 
     indicators::ProgressBar bar{
             indicators::option::BarWidth{50},
@@ -34,11 +34,12 @@ void test_distributed(int rank, int mpi_size) {
 
     for (int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+        std::cout << "rank: " << rank << std::endl;
         MPIMatrix matrix{rank, mpi_size, dimension};
         executionTime = measureExecutionTime([&matrix]() {
             matrix.set_upper_diagonals();
         });
-        matrix.print();
+        //matrix.print();
         results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
         bar.tick();
     }

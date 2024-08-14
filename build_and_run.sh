@@ -21,5 +21,5 @@ else
 fi
 
 mpirun -n "$num_workers" ./build/SPM "$num_workers"
-python3 ./scripts/plot.py --workers "$num_workers"
-python3 ./scripts/statistics.py --workers "$num_workers"
+#python3 ./scripts/plot.py --workers "$num_workers"
+#python3 ./scripts/statistics.py --workers "$num_workers"
