@@ -4,8 +4,8 @@
 #include <mpi.h>
 #include <iostream>
 #include <cmath>
-#include <cstdlib>
 #include <mm_malloc.h>
+#include <vector>
 
 /**
  * \brief A class to represent an upper triangular matrix (stored in a 1D array),
@@ -27,25 +27,22 @@ public:
             remainder{size % mpi_world_size},
             start_row{rank * rows_per_proc + std::min(rank, remainder)},
             end_row{start_row + rows_per_proc + (rank < remainder ? 1 : 0)},
-            data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))},
-            diagonal_buffer{new double[end_row - start_row]},
-            combined_diagonal_buffer{new double[size]},
-            recvcounts{mpi_world_size},
-            displs{mpi_world_size}
+            data{end_row > start_row ? static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64)) : nullptr},
+            diagonal_buffer{end_row > start_row ? new double[end_row - start_row] : nullptr},
+            combined_diagonal_buffer{end_row > start_row ? new double[size] : nullptr}
     {
-        std::cout << "rank: " << rank << std::endl;
-        std::cout << std::flush;
-        std::cout << "rows per process: " << rows_per_proc << " remainder: " << remainder << std::endl;
-        std::cout << std::flush;
-        std::cout << " start: " << start_row << " end: " << end_row << std::endl;
-        std::cout << std::flush;
+        // Create a new communicator for processes with valid rows
+        MPI_Comm_split(MPI_COMM_WORLD, end_row > start_row, rank, &comm);
+        if (end_row <= start_row) return;
 
         for (int i = 0; i < size; ++i) {
             data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
 
+        recvcounts.resize(mpi_world_size);
+        displs.resize(mpi_world_size);
         for (int i = 0; i < mpi_world_size; ++i) {
-            int proc_rows = size / mpi_world_size + (i < remainder ? 1 : 0);
+            const int proc_rows = size / mpi_world_size + (i < remainder ? 1 : 0);
             recvcounts[i] = proc_rows;
         }
         for (int i = 0; i < mpi_world_size; ++i) {
@@ -60,6 +57,7 @@ public:
         if (data) _mm_free(data);
         delete[] diagonal_buffer;
         delete[] combined_diagonal_buffer;
+        MPI_Comm_free(&comm);
     }
 
     /**
@@ -67,42 +65,36 @@ public:
      * corresponding row and column. The dot product is calculated using the previous upper diagonals. The diagonal
      * elements are then gathered to all MPI processes.
      */
-    void set_upper_diagonals() {
+    void set_upper_diagonals() const {
+        if (end_row <= start_row) return;
 
         // Iterate over the diagonals.
         for (int k = 1; k < size; ++k) {
 
-            // Reset diagonal_buffer for safety
-            std::fill(diagonal_buffer, diagonal_buffer + (end_row - start_row), 0);
-
             // Distribute across the rows.
-            for (int i = start_row; i <= end_row && i < size - k; ++i) {
+            for (int i = start_row; i < end_row && i < size - k; ++i) {
 
-                alignas(64)
-                double dot_product{0};
+                alignas(64) double dot_product{0};
                 for (int j = 0; j < k; ++j) {
                     dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
                 data[index(i, i + k)] = std::cbrt(dot_product);
-                diagonal_buffer[i] = data[index(i, i + k)];
+                diagonal_buffer[i - start_row] = data[index(i, i + k)];
 
             }
-            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Barrier(comm);
 
-            std::cout << "Process " << rank << " reached MPI_Gatherv at k=" << k << std::endl;
             // Gather the diagonal elements
             MPI_Gatherv(diagonal_buffer, end_row - start_row, MPI_DOUBLE,
                         combined_diagonal_buffer, recvcounts.data(), displs.data(), MPI_DOUBLE,
-                        0, MPI_COMM_WORLD);
-            MPI_Barrier(MPI_COMM_WORLD);
+                        0, comm);
+            MPI_Barrier(comm);
 
-            std::cout << "Process " << rank << " reached MPI_Bcast at k=" << k << std::endl;
             // Broadcast the combined buffer to all processes
-            MPI_Bcast(combined_diagonal_buffer, size - k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Bcast(combined_diagonal_buffer, size - k, MPI_DOUBLE, 0, comm);
 
             // Update the matrix for all the processes.
             for (int i = 0; i < size - k; ++i) {
-                std::cout << combined_diagonal_buffer[i] << std::endl;
                 data[index(i, i + k)] = combined_diagonal_buffer[i];
             }
 
@@ -126,6 +118,7 @@ public:
         }
         oss << "\n";
         std::cout << oss.str();
+        std::cout << std::flush;
     }
 
 private:
@@ -139,8 +132,9 @@ private:
     double* __restrict__ const data; ///< 1D array to store the matrix.
     double* __restrict__ const diagonal_buffer; ///< Buffer for diagonal elements.
     double* __restrict__ const combined_diagonal_buffer; ///< Buffer for combined diagonal elements.
-    std::vector<int> recvcounts;
-    std::vector<int> displs;
+    std::vector<int> recvcounts{};
+    std::vector<int> displs{};
+    MPI_Comm comm{};
 
     /**
      * \brief Calculate the index in the data array for a given row and column.
@@ -148,7 +142,7 @@ private:
      * \param column The column index.
      * \return The index in the data array.
      */
-    [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
+    [[nodiscard]] size_t index(const long row, const long column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 };

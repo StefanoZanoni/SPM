@@ -19,7 +19,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-mavx2 -mfma)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0")
 
 # Get the absolute path of the project directory
 set(PROJECT_DIR ${CMAKE_SOURCE_DIR})
@@ -67,4 +67,4 @@ FetchContent_MakeAvailable(indicators)
 
 target_link_libraries(sequential PRIVATE indicators)
 target_link_libraries(parallel PRIVATE indicators)
-target_link_libraries(distributed PRIVATE indicators ${MPI_LIBRARIES})
+target_link_libraries(distributed PRIVATE indicators MPI::MPI_CXX)
