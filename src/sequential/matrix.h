@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <cmath>
-#include <cstdlib>
 #include <mm_malloc.h>
 
 class UTMatrix {
@@ -22,7 +21,7 @@ public:
         _mm_free(data);
     }
 
-    void set_upper_diagonals() {
+    void set_upper_diagonals() const {
 
         // Iterate over upper diagonals
         for (size_t k = 1; k < size; ++k) {
@@ -33,8 +32,7 @@ public:
                 for (size_t j = 0; j < k; ++j) {
                     dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
-                data[index(i, i + k)] = dot_product;
-
+                data[index(i, i + k)] = std::cbrt(dot_product);
             }
         }
     }
@@ -59,7 +57,7 @@ private:
     const size_t size;
     double* __restrict__ const data;
 
-    [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
+    [[nodiscard]] size_t index(const size_t row, const size_t column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 

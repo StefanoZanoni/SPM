@@ -3,9 +3,7 @@
 
 #include <iostream>
 #include <cmath>
-#include <cstdlib>
 #include <ff/parallel_for.hpp>
-#include <thread>
 #include <mm_malloc.h>
 
 class FFMatrix {
@@ -22,7 +20,7 @@ public:
         _mm_free(data);
     }
 
-    void set_upper_diagonals(const long maxnw = 0) {
+    void set_upper_diagonals(const long maxnw = 0) const {
         ff::ParallelFor pf = (maxnw <= 0) ? ff::ParallelFor{true, true} : ff::ParallelFor{maxnw, true, true};
 
         // Iterate over upper diagonals
@@ -58,11 +56,10 @@ public:
     }
 
 private:
-
     const long size;
     double* __restrict__ const data;
 
-    [[nodiscard]] inline size_t index(const size_t row, const size_t column) const {
+    [[nodiscard]] size_t index(const size_t row, const size_t column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 
