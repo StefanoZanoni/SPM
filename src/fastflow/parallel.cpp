@@ -9,8 +9,8 @@
 
 
 void test_parallel(const long maxnw) {
-    const unsigned int start = 1;
-    const unsigned int end = 2048;
+    constexpr unsigned int start = 1;
+    constexpr unsigned int end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
@@ -18,7 +18,7 @@ void test_parallel(const long maxnw) {
     std::cout << "Processing with " << maxnw << " threads..." << std::endl;
 
     {
-        indicators::ProgressBar bar{
+        indicators::ProgressBar bar {
                 indicators::option::BarWidth{50},
                 indicators::option::Start{"["},
                 indicators::option::Fill{"="},
@@ -38,7 +38,7 @@ void test_parallel(const long maxnw) {
             executionTime = measureExecutionTime([&matrix, maxnw]() {
                 matrix.set_upper_diagonals(maxnw);
             });
-            results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+            results.emplace_back(std::vector{static_cast<double>(dimension), executionTime});
             bar.tick();
         }
 
@@ -70,7 +70,7 @@ void test_parallel(const long maxnw) {
             executionTime = measureExecutionTime([&matrix]() {
                 matrix.set_upper_diagonals(1);
             });
-            results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+            results.emplace_back(std::vector{static_cast<double>(dimension), executionTime});
             bar.tick();
         }
 
