@@ -25,6 +25,7 @@ public:
 
         // Iterate over upper diagonals
         for (long k = 1; k < size; ++k) {
+
             // Iterate over rows in parallel
             pf.parallel_for_static(0, size - k, 1, 0, [&](const long i) {
 
@@ -36,6 +37,7 @@ public:
                 data[index(i, i + k)] = std::cbrt(dot_product);
 
             });
+
         }
     }
 
@@ -59,7 +61,7 @@ private:
     const long size;
     double* __restrict__ const data;
 
-    [[nodiscard]] size_t index(const size_t row, const size_t column) const {
+    [[nodiscard]] long index(const long row, const long column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 

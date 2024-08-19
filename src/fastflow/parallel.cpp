@@ -9,8 +9,8 @@
 
 
 void test_parallel(const long maxnw) {
-    constexpr unsigned int start = 1;
-    constexpr unsigned int end = 2048;
+    constexpr long start = 1;
+    constexpr long end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
@@ -32,7 +32,7 @@ void test_parallel(const long maxnw) {
                 indicators::option::MaxProgress{end - start + 1}
         };
 
-        for (unsigned int dimension = start; dimension <= end; ++dimension) {
+        for (long dimension = start; dimension <= end; ++dimension) {
             bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
             FFMatrix matrix{dimension};
             executionTime = measureExecutionTime([&matrix, maxnw]() {
@@ -64,7 +64,7 @@ void test_parallel(const long maxnw) {
         std::cout << "Processing with 1 thread..." << std::endl;
         bar.set_progress(0);
 
-        for (unsigned int dimension = start; dimension <= end; ++dimension) {
+        for (long dimension = start; dimension <= end; ++dimension) {
             bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
             FFMatrix matrix{dimension};
             executionTime = measureExecutionTime([&matrix]() {

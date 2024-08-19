@@ -9,8 +9,8 @@
 
 
 void test_sequential() {
-    constexpr unsigned int start = 1;
-    constexpr unsigned int end = 2048;
+    constexpr long start = 1;
+    constexpr long end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 
@@ -30,9 +30,9 @@ void test_sequential() {
             indicators::option::MaxProgress{end - start + 1}
     };
 
-    for (unsigned int dimension = start; dimension <= end; ++dimension) {
+    for (long dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
-        UTMatrix matrix{dimension};
+        SeqMatrix matrix{dimension};
         const double executionTime = measureExecutionTime([&matrix]() {
             matrix.set_upper_diagonals();
         });

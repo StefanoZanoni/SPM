@@ -5,31 +5,31 @@
 #include <cmath>
 #include <mm_malloc.h>
 
-class UTMatrix {
+class SeqMatrix {
 
 public:
-    explicit UTMatrix(const size_t size) :
+    explicit SeqMatrix(const long size) :
     size{size},
     data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))}
     {
-        for (size_t i = 0; i < size; ++i) {
+        for (long i = 0; i < size; ++i) {
             data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
     }
 
-    ~UTMatrix() {
+    ~SeqMatrix() {
         _mm_free(data);
     }
 
     void set_upper_diagonals() const {
 
         // Iterate over upper diagonals
-        for (size_t k = 1; k < size; ++k) {
+        for (long k = 1; k < size; ++k) {
             // Iterate over rows
-            for (size_t i = 0; i < size - k; ++i) {
+            for (long i = 0; i < size - k; ++i) {
 
                 alignas(64) double dot_product{0};
-                for (size_t j = 0; j < k; ++j) {
+                for (long j = 0; j < k; ++j) {
                     dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
                 }
                 data[index(i, i + k)] = std::cbrt(dot_product);
@@ -39,8 +39,8 @@ public:
 
     void print() const {
         std::ostringstream oss;
-        for (size_t i = 0; i < size; ++i) {
-            for (size_t j = 0; j < size; ++j) {
+        for (long i = 0; i < size; ++i) {
+            for (long j = 0; j < size; ++j) {
                 if (j >= i) {
                     oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
                 } else {
@@ -54,10 +54,10 @@ public:
     }
 
 private:
-    const size_t size;
+    const long size;
     double* __restrict__ const data;
 
-    [[nodiscard]] size_t index(const size_t row, const size_t column) const {
+    [[nodiscard]] long index(const long row, const long column) const {
         return (row * (2 * size - row + 1)) / 2 + column - row;
     }
 
