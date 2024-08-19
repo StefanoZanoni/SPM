@@ -9,15 +9,14 @@
 
 
 void test_sequential() {
-    const unsigned int start = 1;
-    const unsigned int end = 2048;
+    constexpr unsigned int start = 1;
+    constexpr unsigned int end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
-    double executionTime;
 
     std::cout << "Processing sequential..." << std::endl;
 
-    indicators::ProgressBar bar{
+    indicators::ProgressBar bar {
             indicators::option::BarWidth{50},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
@@ -34,10 +33,10 @@ void test_sequential() {
     for (unsigned int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
         UTMatrix matrix{dimension};
-        executionTime = measureExecutionTime([&matrix]() {
+        const double executionTime = measureExecutionTime([&matrix]() {
             matrix.set_upper_diagonals();
         });
-        results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+        results.emplace_back(std::vector{static_cast<double>(dimension), executionTime});
         bar.tick();
     }
 

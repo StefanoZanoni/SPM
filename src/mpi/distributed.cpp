@@ -1,7 +1,5 @@
 #include <vector>
 #include <indicators/progress_bar.hpp>
-#include <mpi.h>
-#include <mm_malloc.h>
 
 #include "mpimatrix.h"
 #include "../utils/timer.h"
@@ -9,16 +7,15 @@
 
 #include "distributed.h"
 
-void test_distributed(int rank, int mpi_size) {
-    const int start = 5;
-    const int end = 5;
+void test_distributed(const int rank, const int mpi_size) {
+    constexpr int start = 5;
+    constexpr int end = 5;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
-    double executionTime;
 
-    //std::cout << "Processing distributed..." << std::endl;
+    std::cout << "Processing distributed..." << std::endl;
 
-    indicators::ProgressBar bar{
+    indicators::ProgressBar bar {
             indicators::option::BarWidth{50},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
@@ -34,13 +31,12 @@ void test_distributed(int rank, int mpi_size) {
 
     for (int dimension = start; dimension <= end; ++dimension) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
-        std::cout << "rank: " << rank << std::endl;
-        MPIMatrix matrix{rank, mpi_size, dimension};
-        executionTime = measureExecutionTime([&matrix]() {
-            matrix.set_upper_diagonals();
-        });
-        //matrix.print();
-        results.emplace_back(std::vector<double>{static_cast<double>(dimension), executionTime});
+        MPIMatrix matrix{dimension, rank, mpi_size};
+        const double executionTime = measureExecutionTime([&matrix]() {
+             matrix.set_upper_diagonals();
+         });
+        matrix.print();
+        results.emplace_back(std::vector{static_cast<double>(dimension), executionTime});
         bar.tick();
     }
 
