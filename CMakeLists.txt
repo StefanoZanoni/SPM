@@ -46,10 +46,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 set(FASTFLOW_DIR ${PROJECT_DIR}/fastflow-master)
 include_directories(${FASTFLOW_DIR})
 
-add_executable(SPM main.cpp
+add_executable(sequential
         src/sequential/sequential.cpp
+        test_sequential.cpp)
+add_executable(parallel
         src/fastflow/parallel.cpp
-        src/mpi/distributed.cpp)
+        test_parallel.cpp)
+add_executable(distributed
+        src/mpi/distributed.cpp
+        test_distributed.cpp)
 
 # Add the indicators library
 include(FetchContent)
@@ -60,5 +65,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(indicators)
 
-target_link_libraries(SPM PRIVATE indicators)
-target_link_libraries(SPM PRIVATE indicators ${MPI_LIBRARIES})
+target_link_libraries(sequential PRIVATE indicators)
+target_link_libraries(parallel PRIVATE indicators)
+target_link_libraries(distributed PRIVATE indicators ${MPI_LIBRARIES})

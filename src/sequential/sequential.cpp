@@ -14,7 +14,7 @@ void test_sequential() {
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 
-    std::cout << "Processing sequential..." << std::endl;
+    std::cout << "Processing sequentially..." << std::endl;
 
     indicators::ProgressBar bar {
             indicators::option::BarWidth{50},

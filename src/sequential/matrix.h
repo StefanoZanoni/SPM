@@ -27,7 +27,6 @@ public:
         for (long k = 1; k < size; ++k) {
             // Iterate over rows
             for (long i = 0; i < size - k; ++i) {
-
                 alignas(64) double dot_product{0};
                 for (long j = 0; j < k; ++j) {
                     dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];

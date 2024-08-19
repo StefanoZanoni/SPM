@@ -17,9 +17,12 @@ if [ -z "$1" ]; then
     # Calculate the total number of physical cores
     num_workers=$((cores_per_socket * sockets))
 else
-  num_workers=$1
+    num_workers=$1
 fi
 
-mpirun -n "$num_workers" ./build/SPM "$num_workers"
-#python3 ./scripts/plot.py --workers "$num_workers"
-#python3 ./scripts/statistics.py --workers "$num_workers"
+#./build/sequential
+#./build/parallel "$num_workers"
+mpirun -n "$num_workers" --use-hwthread-cpus ./build/distributed
+
+python3 ./scripts/plot.py --workers "$num_workers"
+python3 ./scripts/statistics.py --workers "$num_workers"

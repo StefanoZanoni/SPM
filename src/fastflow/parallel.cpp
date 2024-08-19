@@ -15,7 +15,7 @@ void test_parallel(const long maxnw) {
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
 
-    std::cout << "Processing with " << maxnw << " threads..." << std::endl;
+    std::cout << "Processing in parallel with " << maxnw << " threads..." << std::endl;
 
     {
         indicators::ProgressBar bar {
