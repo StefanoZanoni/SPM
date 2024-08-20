@@ -1,24 +1,15 @@
 #ifndef SPM_FFMATRIX_H
 #define SPM_FFMATRIX_H
 
-#include <iostream>
 #include <cmath>
 #include <ff/parallel_for.hpp>
-#include <mm_malloc.h>
 
-class FFMatrix {
+#include "../utils/matrix.h"
+
+class FFMatrix final : public Matrix {
 
 public:
-    explicit FFMatrix(const long size) : size{size},
-            data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))} {
-        for (long i = 0; i < size; ++i) {
-            data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
-        }
-    }
-
-    ~FFMatrix() {
-        _mm_free(data);
-    }
+    explicit FFMatrix(const long size) : Matrix(size) {}
 
     void set_upper_diagonals(const long maxnw = 0) const {
         ff::ParallelFor pf = (maxnw <= 0) ? ff::ParallelFor{true, true} : ff::ParallelFor{maxnw, true, true};
@@ -40,31 +31,6 @@ public:
 
         }
     }
-
-    void print() const {
-        std::ostringstream oss;
-        for (long i = 0; i < size; ++i) {
-            for (long j = 0; j < size; ++j) {
-                if (j >= i) {
-                    oss << std::setw(9) << std::setprecision(6) << std::fixed << data[index(i, j)] << " ";
-                } else {
-                    oss << std::setw(10) << "0 ";
-                }
-            }
-            oss << '\n';
-        }
-        oss << "\n";
-        std::cout << oss.str();
-    }
-
-private:
-    const long size;
-    double* __restrict__ const data;
-
-    [[nodiscard]] long index(const long row, const long column) const {
-        return (row * (2 * size - row + 1)) / 2 + column - row;
-    }
-
 };
 
 #endif //SPM_FFMATRIX_H

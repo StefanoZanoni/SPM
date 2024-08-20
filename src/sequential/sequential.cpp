@@ -1,7 +1,7 @@
 #include <vector>
 #include <indicators/progress_bar.hpp>
 
-#include "matrix.h"
+#include "seqmatrix.h"
 #include "../utils/timer.h"
 #include "../utils/csv.h"
 
@@ -9,8 +9,8 @@
 
 
 void test_sequential() {
-    constexpr long start = 1;
-    constexpr long end = 2048;
+    constexpr long start = 1200;
+    constexpr long end = 1300;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 

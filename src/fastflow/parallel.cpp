@@ -9,8 +9,8 @@
 
 
 void test_parallel(const long maxnw) {
-    constexpr long start = 1;
-    constexpr long end = 2048;
+    constexpr long start = 1200;
+    constexpr long end = 1300;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
     double executionTime;
@@ -61,7 +61,7 @@ void test_parallel(const long maxnw) {
                 indicators::option::MaxProgress{end - start + 1}
         };
 
-        std::cout << "Processing with 1 thread..." << std::endl;
+        std::cout << "Processing in parallel with 1 thread..." << std::endl;
         bar.set_progress(0);
 
         for (long dimension = start; dimension <= end; ++dimension) {

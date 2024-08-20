@@ -2,13 +2,13 @@
 #define SPM_MATRIX_H
 
 #include <iostream>
-#include <cmath>
+#include <iomanip>
 #include <mm_malloc.h>
 
-class SeqMatrix {
+class Matrix {
 
 public:
-    explicit SeqMatrix(const long size) :
+    explicit Matrix(const long size) :
     size{size},
     data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))}
     {
@@ -17,23 +17,8 @@ public:
         }
     }
 
-    ~SeqMatrix() {
+    virtual ~Matrix() {
         _mm_free(data);
-    }
-
-    void set_upper_diagonals() const {
-
-        // Iterate over upper diagonals
-        for (long k = 1; k < size; ++k) {
-            // Iterate over rows
-            for (long i = 0; i < size - k; ++i) {
-                alignas(64) double dot_product{0};
-                for (long j = 0; j < k; ++j) {
-                    dot_product += data[index(i, i + j)] * data[index(i + 1 + j, i + k)];
-                }
-                data[index(i, i + k)] = std::cbrt(dot_product);
-            }
-        }
     }
 
     void print() const {
@@ -50,9 +35,10 @@ public:
         }
         oss << "\n";
         std::cout << oss.str();
+        std::cout << std::flush;
     }
 
-private:
+protected:
     const long size;
     double* __restrict__ const data;
 
