@@ -20,8 +20,8 @@ else
     num_workers=$1
 fi
 
-#./build/sequential
-#./build/parallel "$num_workers"
+./build/sequential
+./build/parallel "$num_workers"
 mpirun -n "$num_workers" --use-hwthread-cpus ./build/distributed
 
 python3 ./scripts/plot.py --workers "$num_workers"
