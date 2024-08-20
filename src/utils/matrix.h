@@ -10,15 +10,19 @@ class Matrix {
 public:
     explicit Matrix(const long size) :
     size{size},
-    data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 64))}
+    data{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))},
+    data_t{static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32))}
     {
         for (long i = 0; i < size; ++i) {
             data[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
+            data_t[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
+
     }
 
     virtual ~Matrix() {
         _mm_free(data);
+        _mm_free(data_t);
     }
 
     void print() const {
@@ -34,17 +38,18 @@ public:
             oss << '\n';
         }
         oss << "\n";
-        std::cout << oss.str();
-        std::cout << std::flush;
+        std::cout << oss.str() << std::flush;
     }
 
 protected:
     const long size;
     double* __restrict__ const data;
+    double* __restrict__ const data_t;
 
     [[nodiscard]] long index(const long row, const long column) const {
-        return (row * (2 * size - row + 1)) / 2 + column - row;
+        return row * (2 * size - row + 1) / 2 + column - row;
     }
+
 
 };
 
