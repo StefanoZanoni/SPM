@@ -10,7 +10,7 @@
 
 void test_sequential() {
     constexpr long start = 1;
-    constexpr long end = 4096;
+    constexpr long end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 

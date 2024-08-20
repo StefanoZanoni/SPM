@@ -50,7 +50,6 @@ protected:
         return row * (2 * size - row + 1) / 2 + column - row;
     }
 
-
 };
 
 #endif //SPM_MATRIX_H

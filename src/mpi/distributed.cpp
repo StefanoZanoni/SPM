@@ -10,8 +10,8 @@
 #include <numeric>
 
 void test_distributed(const int rank, const int mpi_world_size) {
-    constexpr int start = 1200;
-    constexpr int end = 1300;
+    constexpr int start = 1;
+    constexpr int end = 2048;
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 
