@@ -52,7 +52,7 @@ void test_distributed(const int rank, const int mpi_world_size) {
         }
 
         if (rank == 0) {
-            writeCSV<double>("distributed_d.csv", headers, results);
+            writeCSV<double>("distributed_" + std::to_string(mpi_world_size) + ".csv", headers, results);
         }
     }
 

@@ -5,13 +5,6 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-cwd = os.getcwd()
-file_path_sequential = os.path.join(cwd, './results/sequential.csv')
-file_path_parallel_p = os.path.join(cwd, './results/parallel_p.csv')
-file_path_parallel_1 = os.path.join(cwd, './results/parallel_1.csv')
-file_path_distributed_d = os.path.join(cwd, './results/distributed_d.csv')
-file_path_distributed_1 = os.path.join(cwd, './results/distributed_1.csv')
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -49,6 +42,13 @@ args = parse_arguments()
 num_workers = args.workers
 if num_workers <= 0:
     num_workers = psutil.cpu_count(logical=False)
+
+cwd = os.getcwd()
+file_path_sequential = os.path.join(cwd, './results/sequential.csv')
+file_path_parallel_p = os.path.join(cwd, f'./results/parallel_{num_workers}.csv')
+file_path_parallel_1 = os.path.join(cwd, './results/parallel_1.csv')
+file_path_distributed_d = os.path.join(cwd, f'./results/distributed_{num_workers}.csv')
+file_path_distributed_1 = os.path.join(cwd, './results/distributed_1.csv')
 
 # Read sequential data
 headers, data = open_csv(file_path_sequential)

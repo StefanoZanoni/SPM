@@ -13,9 +13,9 @@ args = parse_arguments()
 num_workers = args.workers
 
 sequential_data = np.genfromtxt('./results/sequential.csv', delimiter=',', skip_header=1)
-parallel_p_data = np.genfromtxt('./results/parallel_p.csv', delimiter=',', skip_header=1)
+parallel_p_data = np.genfromtxt(f'./results/parallel_{num_workers}.csv', delimiter=',', skip_header=1)
 parallel_1_data = np.genfromtxt('./results/parallel_1.csv', delimiter=',', skip_header=1)
-distributed_d_data = np.genfromtxt('./results/distributed_d.csv', delimiter=',', skip_header=1)
+distributed_d_data = np.genfromtxt(f'./results/distributed_{num_workers}.csv', delimiter=',', skip_header=1)
 distributed_1_data = np.genfromtxt('./results/distributed_1.csv', delimiter=',', skip_header=1)
 
 mean_execution_time_sequential = np.mean(sequential_data[:, 1])

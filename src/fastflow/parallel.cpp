@@ -42,7 +42,7 @@ void test_parallel(const long maxnw) {
             bar.tick();
         }
 
-        writeCSV<double>("parallel_p.csv", headers, results);
+        writeCSV<double>("parallel_" + std::to_string(maxnw) + ".csv", headers, results);
         results.clear();
     }
 

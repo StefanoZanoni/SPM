@@ -48,13 +48,28 @@ include_directories(${FASTFLOW_DIR})
 
 add_executable(sequential
         src/sequential/sequential.cpp
-        test_sequential.cpp)
+        test_sequential.cpp
+        src/utils/csv.h
+        src/utils/matrix.h
+        src/utils/timer.h
+        src/sequential/sequential.h
+        src/sequential/seqmatrix.h)
 add_executable(parallel
         src/fastflow/parallel.cpp
-        test_parallel.cpp)
+        test_parallel.cpp
+        src/utils/csv.h
+        src/utils/matrix.h
+        src/utils/timer.h
+        src/fastflow/parallel.h
+        src/fastflow/ffmatrix.h)
 add_executable(distributed
         src/mpi/distributed.cpp
-        test_distributed.cpp)
+        test_distributed.cpp
+        src/utils/csv.h
+        src/utils/matrix.h
+        src/utils/timer.h
+        src/mpi/mpimatrix.h
+        src/mpi/distributed.h)
 
 # Add the indicators library
 include(FetchContent)
