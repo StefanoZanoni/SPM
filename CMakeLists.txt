@@ -9,10 +9,17 @@ find_package(Python3 REQUIRED)
 # Use the specified Python executable
 if(Python3_EXECUTABLE)
     set(Python3_EXECUTABLE ${Python3_EXECUTABLE})
+else()
+    message(FATAL_ERROR "Python3 not found")
 endif()
 
 find_package(MPI REQUIRED)
-include_directories(${MPI_INCLUDE_PATH})
+if(MPI_C_FOUND)
+    include_directories(${MPI_C_INCLUDE_PATH})
+    link_directories(${MPI_C_LIBRARIES})
+else()
+    message(FATAL_ERROR "MPI not found")
+endif()
 
 # Add AVX2 and FMA flags for GCC and Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -82,4 +89,4 @@ FetchContent_MakeAvailable(indicators)
 
 target_link_libraries(sequential PRIVATE indicators)
 target_link_libraries(parallel PRIVATE indicators)
-target_link_libraries(distributed PRIVATE indicators MPI::MPI_CXX)
+target_link_libraries(distributed PRIVATE indicators MPI::MPI_C)
