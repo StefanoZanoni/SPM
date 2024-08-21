@@ -9,8 +9,7 @@
 
 
 void test_sequential() {
-    constexpr long start = 1;
-    constexpr long end = 2048;
+    constexpr int dimensions[4]{1024, 2048, 4096, 8192};
     std::vector<std::vector<double>> results;
     const std::vector<std::string> headers{"Dimension", "Execution Time"};
 
@@ -27,10 +26,10 @@ void test_sequential() {
             indicators::option::ForegroundColor{indicators::Color::yellow},
             indicators::option::ShowElapsedTime{true},
             indicators::option::ShowRemainingTime{true},
-            indicators::option::MaxProgress{end - start + 1}
+            indicators::option::MaxProgress{4}
     };
 
-    for (long dimension = start; dimension <= end; ++dimension) {
+    for (const int dimension : dimensions) {
         bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
         SeqMatrix matrix{dimension};
         const double executionTime = measureExecutionTime([&matrix]() {

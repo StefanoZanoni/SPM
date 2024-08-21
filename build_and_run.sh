@@ -1,28 +1,27 @@
 #!/bin/bash
 
-# Navigate to the project directory
 cd "$(dirname "$0")" || exit
 
+# Compile the project
 export CXX=mpicxx
-
 cmake .
 make
 
-# Determine the number of workers
-if [ -z "$1" ]; then
-    # Get the number of cores per socket
-    cores_per_socket=$(lscpu | grep "^Core(s) per socket:" | awk '{print $4}')
-    # Get the number of sockets
-    sockets=$(lscpu | grep "^Socket(s):" | awk '{print $2}')
-    # Calculate the total number of physical cores
-    num_workers=$((cores_per_socket * sockets))
-else
-    num_workers=$1
-fi
+chmod +x ./fastflow-master/ff/mapping_string.sh > /dev/null
+echo y > ./fastflow-master/ff/mapping_string.sh
 
+# List of CPU counts to test
+cpu_counts=(2 4 8 16)
+
+# Run the sequential application
 ./build/sequential
-./build/parallel "$num_workers"
-mpirun -n "$num_workers" --use-hwthread-cpus ./build/distributed
+./build/parallel 1
+mpirun -n 1 --use-hwthread-cpus ./build/distributed
 
-python3 ./scripts/plot.py --workers "$num_workers"
-python3 ./scripts/statistics.py --workers "$num_workers"
+for cpus in "${cpu_counts[@]}"; do
+    ./build/parallel "${cpus}"
+    mpirun -n "${cpus}" --use-hwthread-cpus ./build/distributed
+done
+
+#python3 plot.py
+#python3 statistics.py
