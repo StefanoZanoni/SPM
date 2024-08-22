@@ -21,7 +21,7 @@ scalabilities = []
 parallel_p_all_times = []
 distributed_d_all_times = []
 
-total_workers = [2, 4, 8, 16]
+total_workers = [2, 4, 8, 16, 20]
 for workers in total_workers:
     parallel_p = np.genfromtxt(f'./results/parallel_{workers}.csv', delimiter=',', skip_header=1)
     distributed_p = np.genfromtxt(f'./results/distributed_{workers}.csv', delimiter=',', skip_header=1)
