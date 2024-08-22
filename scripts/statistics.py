@@ -1,83 +1,69 @@
 import numpy as np
-import argparse
 import json
 
+sequential_results_file = './results/sequential.csv'
+parallel_1_results_file = './results/parallel_1.csv'
+distributed_1_results_file = './results/distributed_1.csv'
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--workers', type=int, default=1, help='Number of workers used in parallel execution')
-    return parser.parse_args()
+sequential = np.genfromtxt(sequential_results_file, delimiter=',', skip_header=1)
+parallel_1 = np.genfromtxt(parallel_1_results_file, delimiter=',', skip_header=1)
+distributed_1 = np.genfromtxt(distributed_1_results_file, delimiter=',', skip_header=1)
 
+dimensions = sequential[:, 0]
+dimensions = [int(dimension) for dimension in dimensions]
+sequential_times = sequential[:, 1]
+parallel_1_times = parallel_1[:, 1]
+distributed_1_times = distributed_1[:, 1]
 
-args = parse_arguments()
-num_workers = args.workers
+speedups = []
+efficiencies = []
+scalabilities = []
+parallel_p_all_times = []
+distributed_d_all_times = []
 
-sequential_data = np.genfromtxt('./results/sequential.csv', delimiter=',', skip_header=1)
-parallel_p_data = np.genfromtxt(f'./results/parallel_{num_workers}.csv', delimiter=',', skip_header=1)
-parallel_1_data = np.genfromtxt('./results/parallel_1.csv', delimiter=',', skip_header=1)
-distributed_d_data = np.genfromtxt(f'./results/distributed_{num_workers}.csv', delimiter=',', skip_header=1)
-distributed_1_data = np.genfromtxt('./results/distributed_1.csv', delimiter=',', skip_header=1)
+total_workers = [2, 4, 8, 16]
+for workers in total_workers:
+    parallel_p = np.genfromtxt(f'./results/parallel_{workers}.csv', delimiter=',', skip_header=1)
+    distributed_p = np.genfromtxt(f'./results/distributed_{workers}.csv', delimiter=',', skip_header=1)
 
-mean_execution_time_sequential = np.mean(sequential_data[:, 1])
-std_execution_time_sequential = np.std(sequential_data[:, 1])
+    parallel_p_times = parallel_p[:, 1]
+    distributed_d_times = distributed_p[:, 1]
+    parallel_p_all_times.append(parallel_p_times)
+    distributed_d_all_times.append(distributed_d_times)
 
-mean_execution_time_parallel_p = np.mean(parallel_p_data[:, 1])
-std_execution_time_parallel_p = np.std(parallel_p_data[:, 1])
+    parallel_speedup = sequential_times / parallel_p_times
+    distributed_speedup = sequential_times / distributed_d_times
+    speedups.append((parallel_speedup, distributed_speedup))
 
-mean_execution_time_parallel_1 = np.mean(parallel_1_data[:, 1])
-std_execution_time_parallel_1 = np.std(parallel_1_data[:, 1])
+    parallel_efficiency = parallel_speedup / workers
+    distributed_efficiency = distributed_speedup / workers
+    efficiencies.append((parallel_efficiency, distributed_efficiency))
 
-mean_execution_time_distributed_d = np.mean(distributed_d_data[:, 1])
-std_execution_time_distributed_d = np.std(distributed_d_data[:, 1])
+    parallel_scalability = parallel_1_times / parallel_p_times
+    distributed_scalability = distributed_1_times / distributed_d_times
+    scalabilities.append((parallel_scalability, distributed_scalability))
 
-parallel_speedup = np.array([sequential_data[i, 1] / parallel_p_data[i, 1] for i in range(len(sequential_data))])
-mean_parallel_speedup = np.mean(parallel_speedup)
-std_parallel_speedup = np.std(parallel_speedup)
+parallel_speedups = [speedup[0] for speedup in speedups]
+distributed_speedups = [speedup[1] for speedup in speedups]
 
-parallel_efficiency = np.array([parallel_speedup[i] / num_workers for i in range(len(parallel_speedup))])
-mean_parallel_efficiency = np.mean(parallel_efficiency)
-std_parallel_efficiency = np.std(parallel_efficiency)
+parallel_efficiencies = [efficiency[0] for efficiency in efficiencies]
+distributed_efficiencies = [efficiency[1] for efficiency in efficiencies]
 
-parallel_scalability = np.array([parallel_1_data[i, 1] / parallel_p_data[i, 1] for i in range(len(parallel_p_data))])
-mean_parallel_scalability = np.mean(parallel_scalability)
-std_parallel_scalability = np.std(parallel_scalability)
+parallel_scalabilities = [scalability[0] for scalability in scalabilities]
+distributed_scalabilities = [scalability[1] for scalability in scalabilities]
 
-distributed_speedup = np.array([sequential_data[i, 1] / distributed_d_data[i, 1] for i in range(len(sequential_data))])
-mean_distributed_speedup = np.mean(distributed_speedup)
-std_distributed_speedup = np.std(distributed_speedup)
-
-distributed_efficiency = np.array([distributed_speedup[i] / num_workers for i in range(len(distributed_speedup))])
-mean_distributed_efficiency = np.mean(distributed_efficiency)
-std_distributed_efficiency = np.std(distributed_efficiency)
-
-distributed_scalability = np.array([distributed_1_data[i, 1] / distributed_d_data[i, 1]
-                                    for i in range(len(distributed_d_data))])
-mean_distributed_scalability = np.mean(distributed_scalability)
-std_distributed_scalability = np.std(distributed_scalability)
-
-with open('./statistics/statistics.json', 'w') as file:
-    json.dump({
-        'num_workers': num_workers,
-        'mean_execution_time_sequential': mean_execution_time_sequential,
-        'std_execution_time_sequential': std_execution_time_sequential,
-        f'mean_execution_time_parallel_{num_workers}': mean_execution_time_parallel_p,
-        f'std_execution_time_parallel_{num_workers}': std_execution_time_parallel_p,
-        'mean_execution_time_parallel_1': mean_execution_time_parallel_1,
-        'std_execution_time_parallel_1': std_execution_time_parallel_1,
-        'mean_parallel_speedup': mean_parallel_speedup,
-        'std_parallel_speedup': std_parallel_speedup,
-        'mean_parallel_efficiency': mean_parallel_efficiency,
-        'std_parallel_efficiency': std_parallel_efficiency,
-        'mean_parallel_scalability': mean_parallel_scalability,
-        'std_parallel_scalability': std_parallel_scalability,
-        'mean_execution_time_distributed_d': mean_execution_time_distributed_d,
-        'std_execution_time_distributed_d': std_execution_time_distributed_d,
-        'mean_execution_time_distributed_1': np.mean(distributed_1_data[:, 1]),
-        'std_execution_time_distributed_1': np.std(distributed_1_data[:, 1]),
-        'mean_distributed_speedup': mean_distributed_speedup,
-        'std_distributed_speedup': std_distributed_speedup,
-        'mean_distributed_efficiency': mean_distributed_efficiency,
-        'std_distributed_efficiency': std_distributed_efficiency,
-        'mean_distributed_scalability': mean_distributed_scalability,
-        'std_distributed_scalability': std_distributed_scalability
-    }, file, indent=4)
+for i, dimension in zip(range(len(dimensions)), dimensions):
+    statistics = {'sequential execution time (s)': float(sequential_times[i]),
+                  'parallel 1 worker execution time (s)': float(parallel_1_times[i]),
+                  'distributed 1 worker execution time (s)': float(distributed_1_times[i])}
+    for j, workers in zip(range(len(total_workers)), total_workers):
+        statistics[f'parallel {workers} workers execution time (s)'] = float(parallel_p_all_times[j][i])
+        statistics[f'distributed {workers} workers execution time (s)'] = float(distributed_d_all_times[j][i])
+        statistics[f'parallel {workers} workers speedup'] = float(parallel_speedups[j][i])
+        statistics[f'distributed {workers} workers speedup'] = float(distributed_speedups[j][i])
+        statistics[f'parallel {workers} workers efficiency'] = float(parallel_efficiencies[j][i])
+        statistics[f'distributed {workers} workers efficiency'] = float(distributed_efficiencies[j][i])
+        statistics[f'parallel {workers} workers scalability'] = float(parallel_scalabilities[j][i])
+        statistics[f'distributed {workers} workers scalability'] = float(distributed_scalabilities[j][i])
+    with open(f'./statistics/statistics_{dimension}.json', 'w') as file:
+        json.dump(statistics, file, indent=4)

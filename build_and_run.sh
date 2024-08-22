@@ -18,10 +18,11 @@ cpu_counts=(2 4 8 16)
 ./build/parallel 1
 mpirun -n 1 --use-hwthread-cpus ./build/distributed
 
+# Run the parallel and distributed applications
 for cpus in "${cpu_counts[@]}"; do
     ./build/parallel "${cpus}"
     mpirun -n "${cpus}" --use-hwthread-cpus ./build/distributed
 done
 
-#python3 plot.py
-#python3 statistics.py
+python3 ./scripts/plot.py
+python3 ./scripts/statistics.py
