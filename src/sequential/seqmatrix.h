@@ -18,6 +18,29 @@ public:
             // Iterate over rows
             for (long i = 0; i < size - k; ++i) {
 
+                // Try to prefetch the next iteration first 4 double vectors (row and column) into L3 cache
+
+                // first element of the row and column
+                if (i + 1 + k and i + 2 < size - k) {
+                    _mm_prefetch(&data[index(i + 1, i + 2)], _MM_HINT_T2);
+                    _mm_prefetch(&data_t[index(i + 1 + k, i + 1)], _MM_HINT_T2);
+                }
+                // second element of the row and column
+                if (i + 1 + k and i + 3 < size - k) {
+                    _mm_prefetch(&data[index(i + 1, i + 3)], _MM_HINT_T2);
+                    _mm_prefetch(&data_t[index(i + 1 + k, i + 2)], _MM_HINT_T2);
+                }
+                // third element of the row and column
+                if (i + 1 + k and i + 4 < size - k) {
+                    _mm_prefetch(&data[index(i + 1, i + 4)], _MM_HINT_T2);
+                    _mm_prefetch(&data_t[index(i + 1 + k, i + 3)], _MM_HINT_T2);
+                }
+                // fourth element of the row and column
+                if (i + 1 + k and i + 5 < size - k) {
+                    _mm_prefetch(&data[index(i + 1, i + 5)], _MM_HINT_T2);
+                    _mm_prefetch(&data_t[index(i + 1 + k, i + 4)], _MM_HINT_T2);
+                }
+
                 // Use AVX2 to speed up the dot product calculation
                 long j = 0;
                 __m256d sum = _mm256_setzero_pd();
