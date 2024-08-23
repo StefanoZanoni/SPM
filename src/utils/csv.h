@@ -6,6 +6,14 @@
 #include <vector>
 #include <filesystem>
 
+/**
+ * \brief Writes data to a CSV file
+ *
+ * @tparam T The type of the data to write
+ * @param filename The path to the file to write
+ * @param headers The headers of the CSV file
+ * @param data The data to write to the CSV file
+ */
 template <typename T>
 void writeCSV(const std::string& filename, const std::vector<std::string>& headers, const std::vector<std::vector<T>>& data) {
     std::filesystem::path currentPath = std::filesystem::current_path();

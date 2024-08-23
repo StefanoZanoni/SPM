@@ -30,7 +30,7 @@ void test_parallel(const long maxnw) {
     };
 
     for (const int dimension : dimensions) {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+        bar.set_option(indicators::option::PostfixText{"Processed dimension " + std::to_string(dimension)});
         FFMatrix matrix{dimension};
         const double executionTime = measureExecutionTime([&matrix, maxnw]() {
             matrix.set_upper_diagonals(maxnw);

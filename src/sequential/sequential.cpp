@@ -7,7 +7,6 @@
 
 #include "sequential.h"
 
-
 void test_sequential() {
     constexpr int dimensions[4]{1024, 2048, 4096, 8192};
     std::vector<std::vector<double>> results;
@@ -30,7 +29,7 @@ void test_sequential() {
     };
 
     for (const int dimension : dimensions) {
-        bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+        bar.set_option(indicators::option::PostfixText{"Processed dimension " + std::to_string(dimension)});
         SeqMatrix matrix{dimension};
         const double executionTime = measureExecutionTime([&matrix]() {
             matrix.set_upper_diagonals();

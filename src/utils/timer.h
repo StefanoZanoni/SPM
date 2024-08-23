@@ -3,12 +3,18 @@
 
 #include <chrono>
 
+/**
+ * Measure the execution time of a function.
+ * @tparam Func The type of the function to measure.
+ * @param func The function to measure.
+ * @return The execution time of the function in seconds.
+ */
 template<typename Func>
 double measureExecutionTime(Func func) {
-    auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     func();
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = end - start;
+    const auto end = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration = end - start;
     return duration.count();
 }
 

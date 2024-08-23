@@ -57,6 +57,9 @@ public:
         }
     }
 
+    /**
+     * \brief Destructor to free allocated memory.
+     */
     ~MPIMatrix() {
         if (data) _mm_free(data);
         if (data_t) _mm_free(data_t);
@@ -69,11 +72,13 @@ public:
         }
     }
 
+    /**
+     * \brief Set the upper diagonals of the matrix in parallel using MPI.
+     */
     void set_upper_diagonals() const {
         if (end_row <= start_row) return;
 
         alignas(32) double dot_product[4];
-        double value;
 
         // Iterate over the diagonals.
         for (int k = 1; k < size; ++k) {
@@ -123,7 +128,7 @@ public:
                 }
 
                 // Store the result in the current diagonal
-                value = std::cbrt(dot_product[0]);
+                const double value = std::cbrt(dot_product[0]);
                 data[index(i, i + k)] = value;
                 data_t[index(i + k, i)] = value;
 
@@ -142,7 +147,7 @@ public:
 
             // Update the matrix for all the processes.
             for (int i = 0; i < size - k; ++i) {
-                value = combined_diagonal_buffer[i];
+                const double value = combined_diagonal_buffer[i];
                 data[index(i, i + k)] = value;
                 data_t[index(i + k, i)] = value;
             }
@@ -150,6 +155,9 @@ public:
         }
     }
 
+    /**
+     * \brief Print the matrix to the standard output.
+     */
     void print() const {
         std::ostringstream oss;
         for (long i = 0; i < size; ++i) {
@@ -169,7 +177,7 @@ public:
 private:
 
     const int size; ///< The size of the matrix (number of rows and columns).
-    const int rank; ///< The rank of the MPI process.
+    const int rank; ///< The rank of this MPI process.
     const int mpi_world_size; ///< The number of MPI processes.
     const int rows_per_proc; ///< The number of rows per MPI process.
     const int remainder; ///< The remainder when size is divided by the number of MPI processes.
@@ -184,6 +192,12 @@ private:
     int* __restrict__ const displs; ///< The displacement of the receive buffer for each process.
     MPI_Comm comm{MPI_COMM_NULL};
 
+    /**
+     * \brief Calculate the index in the 1D array for a given row and column.
+     * \param row The row index.
+     * \param column The column index.
+     * \return The index in the 1D array.
+     */
     [[nodiscard]] long index(const long row, const long column) const {
         return row * (2 * size - row + 1) / 2 + column - row;
     }

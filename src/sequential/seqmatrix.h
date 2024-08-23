@@ -5,20 +5,33 @@
 #include <cmath>
 #include "../utils/matrix.h"
 
+/**
+ * \brief A class to represent an upper triangular matrix with sequential upper diagonals computation.
+ */
 class SeqMatrix final : public Matrix {
 
 public:
+
+    /**
+     * \brief Constructor to initialize the sequential matrix with a given size.
+     * \param size The size of the matrix (number of rows and columns).
+     */
     explicit SeqMatrix(const long size) : Matrix(size) {}
 
+    /**
+     * \brief Set the upper diagonals of the matrix.
+     * Each element of the upper diagonals is the cubic root of the dot product of the corresponding row and column.
+     */
     void set_upper_diagonals() const {
         alignas(32) double dot_product[4];
 
         // Iterate over upper diagonals
         for (long k = 1; k < size; ++k) {
+
             // Iterate over rows
             for (long i = 0; i < size - k; ++i) {
 
-                // Try to prefetch the next iteration first 4 double vectors (row and column) into L3 cache
+                // Try to prefetch the next iteration first two 4 double vectors (row and column) into L3 cache
 
                 // first element of the row and column
                 if (i + 1 + k and i + 2 < size - k) {
@@ -59,6 +72,7 @@ public:
                     dot_product[0] += data[index(i, i + j)] * data_t[index(i + k, i + 1 + j) ];
                 }
 
+                // Store the result in the current diagonal
                 const double value = std::cbrt(dot_product[0]);
                 data[index(i, i + k)] = value;
                 data_t[index(i + k, i)] = value;

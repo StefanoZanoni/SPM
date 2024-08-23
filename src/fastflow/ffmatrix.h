@@ -7,21 +7,34 @@
 
 #include "../utils/matrix.h"
 
+/**
+ * \brief A class to represent an upper triangular matrix with parallel computation (using FastFlow) of the upper diagonals.
+ */
 class FFMatrix final : public Matrix {
 
 public:
+
+    /**
+     * \brief Constructor to initialize the FastFlow matrix with a given size.
+     * \param size The size of the matrix (number of rows and columns).
+     */
     explicit FFMatrix(const long size) : Matrix(size) {}
 
+    /**
+     * \brief Set the upper diagonals of the matrix in parallel.
+     * Each element of the upper diagonals is the cubic root of the dot product of the corresponding row and column.
+     * \param maxnw The maximum number of workers (default is 0, which means auto-detect).
+     */
     void set_upper_diagonals(const long maxnw = 0) const {
         ff::ParallelFor pf = (maxnw <= 0) ? ff::ParallelFor{true, true} : ff::ParallelFor{maxnw, true, true};
 
         // Iterate over upper diagonals
         for (long k = 1; k < size; ++k) {
 
-            // Iterate over rows in parallel
+            // Iterate over rows in parallel.
             pf.parallel_for_static(0, size - k, 1, 0, [&](const long i) {
 
-                // Try to prefetch the next iteration first 4 double vectors (row and column) into L3 cache
+                // Try to prefetch the next iteration first two 4 double vectors (row and column) into L3 cache
 
                 // first element of the row and column
                 if (i + 1 + k and i + 2 < size - k) {
@@ -63,6 +76,7 @@ public:
                     dot_product[0] += data[index(i, i + j)] * data_t[index(i + k, i + 1 + j) ];
                 }
 
+                // Store the result in the current diagonal
                 const double value = std::cbrt(dot_product[0]);
                 data[index(i, i + k)] = value;
                 data_t[index(i + k, i)] = value;

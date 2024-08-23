@@ -33,7 +33,7 @@ void test_distributed(const int rank, const int mpi_world_size) {
 
     for (const int dimension : dimensions) {
         if (rank == 0)
-            bar.set_option(indicators::option::PostfixText{"Processing dimension " + std::to_string(dimension)});
+            bar.set_option(indicators::option::PostfixText{"Processed dimension " + std::to_string(dimension)});
         MPIMatrix matrix{dimension, rank, mpi_world_size};
         const double executionTime = measureExecutionTime([&matrix]() {
              matrix.set_upper_diagonals();
