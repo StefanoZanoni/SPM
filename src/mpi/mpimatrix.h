@@ -31,8 +31,8 @@ public:
         data_t{end_row > start_row ? static_cast<double*>(_mm_malloc(size * (size + 1) / 2 * sizeof(double), 32)) : nullptr},
         diagonal_buffer{end_row > start_row ? new double[end_row - start_row] : nullptr},
         combined_diagonal_buffer{end_row > start_row ? new double[size] : nullptr},
-        recvcounts(new int[mpi_world_size]),
-        displs(new int[mpi_world_size])
+        recvcounts(rank == 0 ? new int[mpi_world_size] : nullptr),
+        displs(rank == 0 ? new int[mpi_world_size] : nullptr)
     {
         if (mpi_world_size != 1) {
             // Create a new communicator for processes with valid rows
@@ -46,12 +46,14 @@ public:
             data_t[index(i, i)] = static_cast<double>(i + 1) / static_cast<double>(size);
         }
 
-        for (int i = 0; i < mpi_world_size; ++i) {
-            const int proc_rows = size / mpi_world_size + (i < remainder ? 1 : 0);
-            recvcounts[i] = proc_rows;
-        }
-        for (int i = 0; i < mpi_world_size; ++i) {
-            displs[i] = (i == 0) ? 0 : displs[i - 1] + recvcounts[i - 1];
+        if (rank == 0) {
+            for (int i = 0; i < mpi_world_size; ++i) {
+                const int proc_rows = size / mpi_world_size + (i < remainder ? 1 : 0);
+                recvcounts[i] = proc_rows;
+            }
+            for (int i = 0; i < mpi_world_size; ++i) {
+                displs[i] = (i == 0) ? 0 : displs[i - 1] + recvcounts[i - 1];
+            }
         }
     }
 
@@ -69,7 +71,9 @@ public:
 
     void set_upper_diagonals() const {
         if (end_row <= start_row) return;
+
         alignas(32) double dot_product[4];
+        double value;
 
         // Iterate over the diagonals.
         for (int k = 1; k < size; ++k) {
@@ -118,33 +122,29 @@ public:
                     dot_product[0] += data[index(i, i + j)] * data_t[index(i + k, i + 1 + j) ];
                 }
 
-                const double value = std::cbrt(dot_product[0]);
+                // Store the result in the current diagonal
+                value = std::cbrt(dot_product[0]);
                 data[index(i, i + k)] = value;
                 data_t[index(i + k, i)] = value;
 
+                // Store the diagonal element in the buffer for MPI communication
                 diagonal_buffer[i - start_row] = value;
             }
 
             if (mpi_world_size == 1) continue;
 
-            // Non-blocking gather the diagonal elements
-            MPI_Request gather_request;
-            MPI_Igatherv(diagonal_buffer, end_row - start_row, MPI_DOUBLE,
+            // Blocking gather the diagonal elements
+            MPI_Gatherv(diagonal_buffer, end_row - start_row, MPI_DOUBLE,
                          combined_diagonal_buffer, recvcounts, displs, MPI_DOUBLE,
-                         0, comm, &gather_request);
-            // Wait for the gather to complete
-            MPI_Wait(&gather_request, MPI_STATUS_IGNORE);
-
-            // Non-blocking broadcast the combined buffer to all processes
-            MPI_Request bcast_request;
-            MPI_Ibcast(combined_diagonal_buffer, static_cast<int>(size) - k, MPI_DOUBLE, 0, comm, &bcast_request);
-            // Wait for the broadcast to complete
-            MPI_Wait(&bcast_request, MPI_STATUS_IGNORE);
+                         0, comm);
+            // Blocking broadcast the combined buffer to all processes
+            MPI_Bcast(combined_diagonal_buffer, static_cast<int>(size) - k, MPI_DOUBLE, 0, comm);
 
             // Update the matrix for all the processes.
             for (int i = 0; i < size - k; ++i) {
-                data[index(i, i + k)] = combined_diagonal_buffer[i];
-                data_t[index(i + k, i)] = combined_diagonal_buffer[i];
+                value = combined_diagonal_buffer[i];
+                data[index(i, i + k)] = value;
+                data_t[index(i + k, i)] = value;
             }
 
         }
@@ -185,7 +185,7 @@ private:
     MPI_Comm comm{MPI_COMM_NULL};
 
     [[nodiscard]] long index(const long row, const long column) const {
-        return (row * (2 * size - row + 1)) / 2 + column - row;
+        return row * (2 * size - row + 1) / 2 + column - row;
     }
 
 };
