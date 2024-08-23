@@ -91,5 +91,5 @@ for cpus in "${cpu_counts[@]}"; do
     sbatch slurm_scripts/distributed/slurm_distributed_"${cpus}".sh
 done
 
-#python3 plot.py
-#python3 statistics.py
+python3 ./scripts/plots.py
+python3 ./scripts/statistics.py
