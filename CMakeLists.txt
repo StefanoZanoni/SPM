@@ -21,12 +21,12 @@ else()
     message(FATAL_ERROR "MPI not found")
 endif()
 
-# Add AVX2 and FMA flags for GCC and Clang
+# Add AVX flag for GCC and Clang
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-mavx2 -mfma)
+    add_compile_options(-mavx)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
 
 # Get the absolute path of the project directory
 set(PROJECT_DIR ${CMAKE_SOURCE_DIR})

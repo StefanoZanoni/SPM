@@ -57,13 +57,13 @@ public:
                     _mm_prefetch(&data_t[index(i + 1 + k, i + 4)], _MM_HINT_T2);
                 }
 
-                // Use AVX2 to speed up the dot product calculation
+                // Use AVX to speed up the dot product calculation
                 long j = 0;
                 __m256d sum = _mm256_setzero_pd();
                 for (; j <= k - 4; j += 4) {
                     const __m256d row = _mm256_loadu_pd(&data[index(i, i + j)]);
                     const __m256d column = _mm256_loadu_pd(&data_t[index(i + k, i + 1 + j)]);
-                    sum = _mm256_fmadd_pd(row, column, sum);
+                    sum = _mm256_add_pd(sum, _mm256_mul_pd(row, column));
                 }
 
                 // Sum the elements of the AVX register
