@@ -27,7 +27,7 @@ cat <<EOT > slurm_scripts/sequential/slurm_sequential.sh
 #SBATCH --nodes=1                                                               # Number of nodes
 #SBATCH --ntasks=1                                                              # Number of tasks
 #SBATCH --cpus-per-task=1                                                       # Number of CPU cores per task
-#SBATCH --time=00:40:00                                                         # Time limit hrs:min:sec
+#SBATCH --time=01:00:00                                                         # Time limit hrs:min:sec
 #SBATCH --partition=normal                                                      # Partition name
 
 # Load necessary modules
@@ -44,13 +44,13 @@ EOT
 for cpus in "${cpu_counts[@]}"; do
     cat <<EOT > slurm_scripts/parallel/slurm_parallel_"${cpus}".sh
 #!/bin/bash
-#SBATCH --job-name=sz_p_${cpus}cpus                                     # Job name
+#SBATCH --job-name=sz_p_${cpus}                                    # Job name
 #SBATCH --output=slurm_scripts/distributed/output_parallel_${cpus}cpus_%j.txt  # Output file
 #SBATCH --error=slurm_scripts/distributed/error_parallel_${cpus}cpus_%j.txt    # Error file
 #SBATCH --nodes=1                                                              # Number of nodes
 #SBATCH --ntasks=1                                                             # Number of tasks
 #SBATCH --cpus-per-task=${cpus}                                                # Number of CPU cores per task
-#SBATCH --time=00:40:00                                                        # Time limit hrs:min:sec
+#SBATCH --time=01:00:00                                                        # Time limit hrs:min:sec
 #SBATCH --partition=normal                                                     # Partition name
 
 # Load necessary modules
@@ -66,14 +66,15 @@ done
 for cpus in "${cpu_counts[@]}"; do
     cat <<EOT > slurm_scripts/distributed/slurm_distributed_"${cpus}".sh
 #!/bin/bash
-#SBATCH --job-name=sz_d_${cpus}cpus                                     # Job name
+#SBATCH --job-name=sz_d_${cpus}                                    # Job name
 #SBATCH --output=slurm_scripts/distributed/output_distributed_${cpus}cpus_%j.txt  # Output file
 #SBATCH --error=slurm_scripts/distributed/error_distributed_${cpus}cpus_%j.txt    # Error file
-#SBATCH --nodes=8                                                                 # Number of nodes
+#SBATCH --nodes=4                                                                 # Number of nodes
 #SBATCH --ntasks=${cpus}                                                          # Number of tasks
 #SBATCH --cpus-per-task=1                                                         # Number of CPU cores per task
-#SBATCH --time=00:40:00                                                           # Time limit hrs:min:sec
+#SBATCH --time=01:00:00                                                           # Time limit hrs:min:sec
 #SBATCH --partition=normal                                                        # Partition name
+
 # Load necessary modules
 module load gnu12/12.2.0
 module load openmpi4/4.1.5
