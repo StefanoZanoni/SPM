@@ -69,7 +69,7 @@ for cpus in "${cpu_counts[@]}"; do
 #SBATCH --job-name=sz_d_${cpus}                                    # Job name
 #SBATCH --output=slurm_scripts/distributed/output_distributed_${cpus}cpus_%j.txt  # Output file
 #SBATCH --error=slurm_scripts/distributed/error_distributed_${cpus}cpus_%j.txt    # Error file
-#SBATCH --nodes=4                                                                 # Number of nodes
+#SBATCH --nodes=8                                                                 # Number of nodes
 #SBATCH --ntasks=${cpus}                                                          # Number of tasks
 #SBATCH --cpus-per-task=1                                                         # Number of CPU cores per task
 #SBATCH --time=01:00:00                                                           # Time limit hrs:min:sec
