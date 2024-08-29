@@ -13,6 +13,7 @@ else()
     message(FATAL_ERROR "Python3 not found")
 endif()
 
+# Find mpi
 find_package(MPI REQUIRED)
 if(MPI_C_FOUND)
     include_directories(${MPI_C_INCLUDE_PATH})
