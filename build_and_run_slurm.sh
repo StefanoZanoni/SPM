@@ -21,7 +21,7 @@ mkdir -p "slurm_scripts/distributed"
 # Create SLURM scripts for sequential application
 cat <<EOT > slurm_scripts/sequential/slurm_sequential.sh
 #!/bin/bash
-#SBATCH --job-name=sz_s                                               # Job name
+#SBATCH --job-name=sz_s                                                         # Job name
 #SBATCH --output=slurm_scripts/sequential/output_sequential%j.txt               # Output file
 #SBATCH --error=slurm_scripts/sequential/error_sequential%j.txt                 # Error file
 #SBATCH --nodes=1                                                               # Number of nodes
@@ -44,7 +44,7 @@ EOT
 for cpus in "${cpu_counts[@]}"; do
     cat <<EOT > slurm_scripts/parallel/slurm_parallel_"${cpus}".sh
 #!/bin/bash
-#SBATCH --job-name=sz_p_${cpus}                                    # Job name
+#SBATCH --job-name=sz_p_${cpus}                                                # Job name
 #SBATCH --output=slurm_scripts/distributed/output_parallel_${cpus}cpus_%j.txt  # Output file
 #SBATCH --error=slurm_scripts/distributed/error_parallel_${cpus}cpus_%j.txt    # Error file
 #SBATCH --nodes=1                                                              # Number of nodes
@@ -66,7 +66,7 @@ done
 for cpus in "${cpu_counts[@]}"; do
     cat <<EOT > slurm_scripts/distributed/slurm_distributed_"${cpus}".sh
 #!/bin/bash
-#SBATCH --job-name=sz_d_${cpus}                                    # Job name
+#SBATCH --job-name=sz_d_${cpus}                                                   # Job name
 #SBATCH --output=slurm_scripts/distributed/output_distributed_${cpus}cpus_%j.txt  # Output file
 #SBATCH --error=slurm_scripts/distributed/error_distributed_${cpus}cpus_%j.txt    # Error file
 #SBATCH --nodes=8                                                                 # Number of nodes
